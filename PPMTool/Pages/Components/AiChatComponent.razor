@@ -1,0 +1,68 @@
+﻿@using Microsoft.EntityFrameworkCore
+@using PPMTool.Data.Context
+@using PPMTool.Services
+<RadzenCard Variant="Variant.Outlined">
+    <RadzenStack Orientation="Radzen.Orientation.Vertical"
+                 Gap="0.5rem">
+        <HintComponent Message="The agent runs a local LLM alongside the web application. It has a read-only connection to the database. You can use the agent to ask natural language queries about the data. For example, 'How many projects did we do for the faculty of humanities in 2026?'" />
+        <RadzenChat Title=""
+                    CurrentUserId="@(ActiveUserId?.ToString())"
+                    Users="@users"
+                    Messages="@messages"
+                    MessagesChanged="@OnMessagesChanged"
+                    ShowUsers="false"
+                    ShowUserNames="true"
+                    ShowClearButton="false"
+                    Placeholder="Ask about data..."
+                    EmptyMessage=""
+                    Style="height: fit-content;" />
+    </RadzenStack>
+</RadzenCard>
+
+@code {
+    [Parameter]
+    public int? ActiveUserId { get; set; }
+
+    [Inject]
+    private UserService UserService { get; set; }
+
+    [Inject]
+    private IDbContextFactory<PPMToolContext> ContextFactory { get; set; }
+
+    private IList<ChatMessage> messages = new List<ChatMessage>();
+    private IList<ChatUser> users = new List<ChatUser>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+
+        // Go get the person from the DB
+        if (ActiveUserId.HasValue)
+        {
+            using (var context = ContextFactory.CreateDbContext())
+            {
+                var user = UserService.GetById(context, ActiveUserId.Value);
+                if (user != null && users.Any(x => x.Name != user.Name))
+                {
+                    users.Add(new ChatUser
+                    {
+                        Id = user.UserId.ToString(),
+                        Name = user.Name
+                    });
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// Fired when a new message is added or a message in the chat history is changed.
+    /// Ensure the UI is updated.
+    /// </summary>
+    /// <param name="newMessages"></param>
+    private void OnMessagesChanged(IEnumerable<ChatMessage> newMessages)
+    {
+        messages = newMessages.ToList();
+        StateHasChanged();
+    }
+
+}

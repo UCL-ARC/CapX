@@ -253,6 +253,7 @@ else
     </RadzenSidebar>
 
     <RadzenBody class="p-0">
+        @* Can the popup go here for the AI chat? *@
         <div class="body-wrapper">
             <div class="content-area rz-p-4">
                 <CascadingValue Value="this">
@@ -296,6 +297,10 @@ else
                                            aria-label="Search bar to navigate to project or person" />
                         </div>
                         <RadzenButton ButtonStyle="ButtonStyle.Light" ButtonType="ButtonType.Button" Click="ClearMagicBar" Icon="close" />
+                        @if (activeUserRoleType == RoleType.Superuser)
+                        {
+                            <RadzenButton ButtonStyle="ButtonStyle.Light" ButtonType="ButtonType.Button" Click="ToggleAiChatAsync" Icon="chat" />
+                        }
                     </RadzenStack>
                 </Authorized>
             </AuthorizeView>

@@ -12,6 +12,7 @@ using PPMTool.Data;
 using PPMTool.Data.Context;
 using PPMTool.Data.Entities;
 using PPMTool.Data.Enums;
+using PPMTool.Pages.Components;
 using PPMTool.Services;
 using Radzen;
 
@@ -55,6 +56,9 @@ namespace PPMTool.Shared
         [Inject]
         private CssVariableService CssVariableService { get; set; }
 
+        [Inject]
+        private DialogService DialogService { get; set; }
+
         /// <summary>
         /// Whether there are any buttons or error messages to show in the action bar.
         /// </summary>
@@ -81,6 +85,33 @@ namespace PPMTool.Shared
         private bool adminMenuItemExpanded = false;
         private int? activeUserId;
         private RoleType activeUserRoleType;
+        private AiChatComponent chatComponent;
+
+        /// <summary>
+        /// Method to toggle the AI chat component.
+        /// This method opens a side dialog containing the AI chat interface, allowing users to interact with the AI chat feature.
+        /// </summary>
+        /// <returns></returns>
+        private async Task ToggleAiChatAsync()
+        {
+            if (chatComponent is null)
+            {
+                chatComponent = await DialogService.OpenSideAsync<AiChatComponent>(
+                    $"{SettingsService.GetSetting(SettingType.ApplicationName)} Data Agent",
+                    new Dictionary<string, object>(),
+                    new SideDialogOptions
+                    {
+                        Width = "600px",
+                        Resizable = true
+                    }
+                );
+            }
+            else
+            {
+                await DialogService.CloseSideAsync(chatComponent);
+                chatComponent = null;
+            }
+        }
 
         /// <summary>
         /// Determines the CSS color variable to use for the banner based on the current environment and settings.
