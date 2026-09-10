@@ -42,7 +42,7 @@
             using (var context = ContextFactory.CreateDbContext())
             {
                 var user = UserService.GetById(context, ActiveUserId.Value);
-                if (user != null && users.Any(x => x.Name != user.Name))
+                if (user != null && !users.Any(x => x.Name == user.Name))
                 {
                     users.Add(new ChatUser
                     {
