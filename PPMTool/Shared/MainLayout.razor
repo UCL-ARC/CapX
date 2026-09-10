@@ -297,7 +297,9 @@ else
                                            aria-label="Search bar to navigate to project or person" />
                         </div>
                         <RadzenButton ButtonStyle="ButtonStyle.Light" ButtonType="ButtonType.Button" Click="ClearMagicBar" Icon="close" />
-                        @if (activeUserRoleType == RoleType.Superuser)
+                        @if (activeUserRoleType == RoleType.Superuser && 
+                                !string.IsNullOrWhiteSpace(SettingsService.GetSetting(SettingType.LLMEndPoint)) &&
+                                !string.IsNullOrWhiteSpace(SettingsService.GetSetting(SettingType.LLMModel)))
                         {
                             <RadzenButton ButtonStyle="ButtonStyle.Light" ButtonType="ButtonType.Button" Click="ToggleAiChatAsync" Icon="chat" />
                         }

@@ -1,21 +1,25 @@
-﻿@using Microsoft.EntityFrameworkCore
+﻿@using System.Diagnostics
+@using Microsoft.EntityFrameworkCore
 @using PPMTool.Data.Context
+@using PPMTool.Data.Enums
 @using PPMTool.Services
-<RadzenCard Variant="Variant.Outlined">
+
+<RadzenCard Variant="Variant.Outlined"
+            class="ai-chat-card">
     <RadzenStack Orientation="Radzen.Orientation.Vertical"
-                 Gap="0.5rem">
+                 Gap="0.5rem"
+                 class="ai-chat-stack">
         <HintComponent Message="The agent runs a local LLM alongside the web application. It has a read-only connection to the database. You can use the agent to ask natural language queries about the data. For example, 'How many projects did we do for the faculty of humanities in 2026?'" />
-        <RadzenChat Title=""
-                    CurrentUserId="@(ActiveUserId?.ToString())"
-                    Users="@users"
-                    Messages="@messages"
-                    MessagesChanged="@OnMessagesChanged"
-                    ShowUsers="false"
-                    ShowUserNames="true"
-                    ShowClearButton="false"
-                    Placeholder="Ask about data..."
-                    EmptyMessage=""
-                    Style="height: fit-content;" />
+        <RadzenAIChat UserAvatarText="@avatarText"
+                      Placeholder="Ask me anything..."
+                      Endpoint="@llmEndpoint"
+                      Model="@llmModel"
+                      ShowDateSeparator="true"
+                      MessageAdded="@OnMessageAdded"
+                      MessageSent="@OnMessageSent"
+                      ResponseReceived="@OnResponseReceived"
+                      ChatCleared="@OnChatCleared"
+                      class="ai-chat-window" />
     </RadzenStack>
 </RadzenCard>
 
@@ -29,8 +33,12 @@
     [Inject]
     private IDbContextFactory<PPMToolContext> ContextFactory { get; set; }
 
-    private IList<ChatMessage> messages = new List<ChatMessage>();
-    private IList<ChatUser> users = new List<ChatUser>();
+    [Inject]
+    private SettingsService SettingsService { get; set; }
+
+    private string avatarText;
+    private string llmEndpoint;
+    private string llmModel;
 
     protected override async Task OnInitializedAsync()
     {
@@ -42,27 +50,40 @@
             using (var context = ContextFactory.CreateDbContext())
             {
                 var user = UserService.GetById(context, ActiveUserId.Value);
-                if (user != null && !users.Any(x => x.Name == user.Name))
+                if (user != null)
                 {
-                    users.Add(new ChatUser
-                    {
-                        Id = user.UserId.ToString(),
-                        Name = user.Name
-                    });
+                    avatarText = user.GetInitials();
                 }
             }
         }
+        
+        // Get the LLM endpoint from the settings
+        llmEndpoint = SettingsService.GetSetting(SettingType.LLMEndPoint);
+        Debug.WriteLine($"** LLM Endpoint = '{llmEndpoint}'");
+
+        // Get the LLM model from the settings
+        llmModel = SettingsService.GetSetting(SettingType.LLMModel);
+        Debug.WriteLine($"** LLM Model = '{llmModel}'");
     }
 
-    /// <summary>
-    /// Fired when a new message is added or a message in the chat history is changed.
-    /// Ensure the UI is updated.
-    /// </summary>
-    /// <param name="newMessages"></param>
-    private void OnMessagesChanged(IEnumerable<ChatMessage> newMessages)
+    void OnMessageAdded(Radzen.Blazor.ChatMessage message)
     {
-        messages = newMessages.ToList();
-        StateHasChanged();
+        Debug.WriteLine($"Message added: {(message.IsUser ? "User" : "Assistant")} - {message.Content.Substring(0, Math.Min(50, message.Content.Length))}...",
+                   message.IsUser ? AlertStyle.Info : AlertStyle.Success);
     }
 
+    void OnMessageSent(string message)
+    {
+        Debug.WriteLine($"Message sent: {message}", AlertStyle.Info);
+    }
+
+    void OnResponseReceived(string response)
+    {
+        Debug.WriteLine($"AI Response received: {response.Substring(0, Math.Min(50, response.Length))}...", AlertStyle.Success);
+    }
+
+    void OnChatCleared()
+    {
+        Debug.WriteLine("Chat cleared", AlertStyle.Warning);
+    }
 }

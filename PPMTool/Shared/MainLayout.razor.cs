@@ -102,7 +102,8 @@ namespace PPMTool.Shared
                     new SideDialogOptions
                     {
                         Width = "600px",
-                        Resizable = true
+                        Resizable = true,
+                        CssClass = "capx-ai-dialog"
                     }
                 );
             }
