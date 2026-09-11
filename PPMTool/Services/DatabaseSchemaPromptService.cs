@@ -11,6 +11,7 @@ namespace PPMTool.Services
     public sealed class DatabaseSchemaPromptService
     {
         private readonly IDbContextFactory<PPMToolContext> contextFactory;
+        private readonly IConfiguration configuration;
 
         /// <summary>
         /// Cached prompt string to avoid rebuilding the prompt on every request.
@@ -19,9 +20,11 @@ namespace PPMTool.Services
         private readonly SemaphoreSlim lockFlag = new(1, 1);
 
         public DatabaseSchemaPromptService(
-            IDbContextFactory<PPMToolContext> contextFactory)
+            IDbContextFactory<PPMToolContext> contextFactory,
+            IConfiguration configuration)
         {
             this.contextFactory = contextFactory;
+            this.configuration = configuration;
         }
 
         /// <summary>
@@ -66,21 +69,42 @@ namespace PPMTool.Services
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
-        private static string BuildPrompt(IModel model)
+        private string BuildPrompt(IModel model)
         {
+            var provider =
+                configuration
+                    .GetValue<string>("DbProvider")
+                    ?.Trim()
+                    ?? "unknown";
+
             var sb = new StringBuilder();
 
-            sb.AppendLine("""
-                You are the CapX Data Agent.
+            sb.AppendLine("You are the CapX Data Agent.");
+            sb.AppendLine();
 
-                The application uses Entity Framework Core.
+            sb.AppendLine($"DATABASE PROVIDER: {provider}");
+            sb.AppendLine();
 
-                Only use tables, columns and relationships that are documented below.
+            switch (provider.ToLowerInvariant())
+            {
+                case "sqlite":
+                    sb.AppendLine("Generate SQLite-compatible SQL.");
+                    break;
 
-                DATABASE SCHEMA
-                ================
-                """
-            );
+                case "sqlserver":
+                    sb.AppendLine("Generate SQL Server compatible SQL.");
+                    break;
+
+                case "postgresql":
+                    sb.AppendLine("Generate PostgreSQL compatible SQL.");
+                    break;
+            }
+
+            sb.AppendLine();
+            sb.AppendLine("Only use tables, columns and relationships that are documented below.");
+            sb.AppendLine();
+            sb.AppendLine("DATABASE SCHEMA");
+            sb.AppendLine("================");
 
             // List all tables, columns, and relationships in the database schema
             foreach (var entityType in model.GetEntityTypes()
@@ -109,7 +133,7 @@ namespace PPMTool.Services
                 // Add the table's schema if it exists
                 var primaryKey = entityType.FindPrimaryKey();
 
-                foreach (var property in entityType.GetProperties())
+                foreach (var property in entityType.GetProperties().OrderBy(p => p.Name))
                 {
                     var line = new StringBuilder();
 
@@ -123,10 +147,11 @@ namespace PPMTool.Services
                         line.Append(" [PRIMARY KEY]");
                     }
 
-                    if (!property.IsNullable)
-                    {
-                        line.Append(" [REQUIRED]");
-                    }
+                    line.Append(
+                        property.IsNullable
+                        ? " [NULLABLE]"
+                        : " [REQUIRED]"
+                    );
 
                     sb.AppendLine(line.ToString());
                 }
@@ -138,11 +163,27 @@ namespace PPMTool.Services
                     sb.AppendLine();
                     sb.AppendLine("  RELATIONSHIPS:");
 
+                    // List all foreign key relationships for the table, showing the columns involved and the referenced table and columns
+                    foreach (var fk in foreignKeys)
+                    {
+                        var principalColumns =
+                            fk.PrincipalKey.Properties
+                                .Select(p => p.Name);
+
+                        sb.AppendLine(
+                            $"    {string.Join(", ", fk.Properties.Select(p => p.Name))}" +
+                            $" -> {fk.PrincipalEntityType.GetTableName()}." +
+                            $"{string.Join(", ", principalColumns)}");
+                    }
+
+                    sb.AppendLine();
+                    sb.AppendLine("  CARDINALITY:");
+
+                    // List the cardinality of the relationships for the table, showing the referenced table and the type of relationship (1:N)
                     foreach (var fk in foreignKeys)
                     {
                         sb.AppendLine(
-                            $"    {string.Join(", ", fk.Properties.Select(p => p.Name))}" +
-                            $" -> {fk.PrincipalEntityType.GetTableName()}");
+                            $"    {fk.PrincipalEntityType.GetTableName()} 1:N {tableName}");
                     }
                 }
             }
@@ -190,7 +231,8 @@ namespace PPMTool.Services
 
             if (clrType.IsEnum)
             {
-                return $"ENUM({clrType.Name})";
+                var underlyingType = Enum.GetUnderlyingType(clrType);
+                return $"ENUM({clrType.Name}) STORED_AS_{underlyingType.Name.ToUpperInvariant()}";
             }
 
             if (clrType == typeof(string))
