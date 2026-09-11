@@ -67,6 +67,7 @@ builder.Services.AddBlazoredSessionStorage();
 builder.Services.AddBlazoredLocalStorage();
 builder.Services.AddRadzenComponents();
 builder.Services.AddTransient<ILogger>(s => s.GetRequiredService<ILogger<Program>>());
+builder.Services.AddScoped<ReadOnlySqlExecutorService>();
 builder.Services.AddAIChatService();
 builder.Services.AddHttpClient();
 builder.Services.AddScoped<InnateCodeService>();
