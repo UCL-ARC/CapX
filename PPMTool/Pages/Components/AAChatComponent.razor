@@ -36,6 +36,12 @@
     [Inject]
     private SettingsService SettingsService { get; set; }
 
+    [Inject]
+    private DatabaseSchemaPromptService DatabaseSchemaPromptService { get; set; }
+
+    [Inject]
+    private ILogger<AAChatComponent> Logger { get; set; }
+
     private string avatarText;
     private string llmEndpoint;
     private string llmModel;
