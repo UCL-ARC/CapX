@@ -85,7 +85,7 @@ namespace PPMTool.Shared
         private bool adminMenuItemExpanded = false;
         private int? activeUserId;
         private RoleType activeUserRoleType;
-        private AAChatComponent chatComponent;
+        private AIChatComponent chatComponent;
 
         /// <summary>
         /// Method to toggle the AI chat component.
@@ -96,7 +96,7 @@ namespace PPMTool.Shared
         {
             if (chatComponent is null)
             {
-                chatComponent = await DialogService.OpenSideAsync<AAChatComponent>(
+                chatComponent = await DialogService.OpenSideAsync<AIChatComponent>(
                     $"{SettingsService.GetSetting(SettingType.ApplicationName)} Data Agent",
                     new Dictionary<string, object>(),
                     new SideDialogOptions
