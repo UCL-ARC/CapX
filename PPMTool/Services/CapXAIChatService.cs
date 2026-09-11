@@ -1,4 +1,5 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Microsoft.Extensions.Options;
 using Radzen;
 
@@ -24,6 +25,7 @@ public sealed class CapXAIChatService : AIChatService, IAIChatService
         DatabaseSchemaPromptService schemaPromptService)
         : base(serviceProvider, options)
     {
+        Debug.WriteLine("*** CapXAIChatService constructed ***");
         this.schemaPromptService = schemaPromptService;
     }
 
@@ -47,6 +49,9 @@ public sealed class CapXAIChatService : AIChatService, IAIChatService
         string apiKey = null,
         string apiKeyHeader = null)
     {
+
+        Debug.WriteLine("*** CapXAIChatService.GetCompletionsAsync called ***");
+
         // Get the generated CapX system prompt from the DatabaseSchemaPromptService.
         var capXSystemPrompt =
             await schemaPromptService.GetPromptAsync(
