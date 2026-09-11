@@ -83,8 +83,9 @@ namespace PPMTool.Shared
         private int totalTimesheetCodesToDeactivate;
         private int totalIncompleteSkills;
         private bool adminMenuItemExpanded = false;
-        private int? activeUserId;
+        private int? activeUserPersonId;
         private RoleType activeUserRoleType;
+        private int activeUserId;
         private AIChatComponent chatComponent;
 
         /// <summary>
@@ -98,7 +99,10 @@ namespace PPMTool.Shared
             {
                 chatComponent = await DialogService.OpenSideAsync<AIChatComponent>(
                     $"{SettingsService.GetSetting(SettingType.ApplicationName)} Data Agent",
-                    new Dictionary<string, object>(),
+                    new Dictionary<string, object>()
+                    {
+                        [nameof(AIChatComponent.ActiveUserId)] = activeUserPersonId
+                    },
                     new SideDialogOptions
                     {
                         Width = "600px",
@@ -215,21 +219,21 @@ namespace PPMTool.Shared
                 await ThemeService.SetDarkLightAsync(useDarkMode, SettingsService, CssVariableService);
             }
 
-            // Set the user id to show the skills tab
-            if (activeUserId == null)
+            // Set the person ID to show the skills tab
+            if (activeUserPersonId == null)
             {
-                using (var context = ContextFactory.CreateDbContext())
-                {
-                    // Store the active user ID
-                    activeUserId = loginView.ActiveUser?.Person?.PersonId;
-                    activeUserRoleType = loginView.ActiveUser?.RoleType ?? RoleType.None;
-                }
+                // Store the active user person ID if they are associate with a person
+                activeUserPersonId = loginView.ActiveUser?.Person?.PersonId;
+                activeUserRoleType = loginView.ActiveUser?.RoleType ?? RoleType.None;
 
-                if (activeUserId != null)
+                if (activeUserPersonId != null)
                 {
                     StateHasChanged();
                 }
             }
+
+            // Set the user ID
+            activeUserId = loginView.ActiveUser?.UserId ?? 0;
 
             // Update the badges in the sidebar if necessary
             if (loginView != null && loginView.ActiveUser != null)
@@ -238,7 +242,7 @@ namespace PPMTool.Shared
                 {
                     // Update timesheet badge
                     var oldTimesheetIssuesValue = totalTimesheetIssues;
-                    totalTimesheetIssues = await TimesheetService.GetIssueCountAsync(context, activeUserId ?? 0);
+                    totalTimesheetIssues = await TimesheetService.GetIssueCountAsync(context, activeUserPersonId ?? 0);
 
                     // Update timesheet code badge
                     var oldTimesheetCodeIssuesValue = totalTimesheetCodesToDeactivate;
@@ -246,7 +250,7 @@ namespace PPMTool.Shared
 
                     // Update skills badge
                     var oldIncompleteSkillsValue = totalIncompleteSkills;
-                    totalIncompleteSkills = await SkillTagService.GetIncompleteRecordCountAsync(context, activeUserId ?? 0);
+                    totalIncompleteSkills = await SkillTagService.GetIncompleteRecordCountAsync(context, activeUserPersonId ?? 0);
 
                     // Only call state has changed when something has changed
                     if (oldTimesheetCodeIssuesValue != totalTimesheetCodesToDeactivate ||

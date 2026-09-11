@@ -11,14 +11,11 @@
                  class="ai-chat-stack">
         <HintComponent Message="The agent runs a local LLM alongside the web application. It has a read-only connection to the database. You can use the agent to ask natural language queries about the data. For example, 'How many projects did we do for the faculty of humanities in 2026?'" />
         <RadzenAIChat UserAvatarText="@avatarText"
+                      SessionId="@chatSessionId"
                       Placeholder="Ask me anything..."
                       Endpoint="@llmEndpoint"
                       Model="@llmModel"
                       ShowDateSeparator="true"
-                      MessageAdded="@OnMessageAdded"
-                      MessageSent="@OnMessageSent"
-                      ResponseReceived="@OnResponseReceived"
-                      ChatCleared="@OnChatCleared"
                       class="ai-chat-window" />
     </RadzenStack>
 </RadzenCard>
@@ -45,6 +42,7 @@
     private string avatarText;
     private string llmEndpoint;
     private string llmModel;
+    private string chatSessionId;
 
     protected override async Task OnInitializedAsync()
     {
@@ -62,6 +60,9 @@
                 }
             }
         }
+
+        // Cook up chat session ID from the user ID
+        chatSessionId = $"user-{ActiveUserId}";
         
         // Get the LLM endpoint from the settings
         llmEndpoint = SettingsService.GetSetting(SettingType.LLMEndPoint);
@@ -70,26 +71,5 @@
         // Get the LLM model from the settings
         llmModel = SettingsService.GetSetting(SettingType.LLMModel);
         Debug.WriteLine($"** LLM Model = '{llmModel}'");
-    }
-
-    void OnMessageAdded(Radzen.Blazor.ChatMessage message)
-    {
-        Debug.WriteLine($"Message added: {(message.IsUser ? "User" : "Assistant")} - {message.Content.Substring(0, Math.Min(50, message.Content.Length))}...",
-                   message.IsUser ? AlertStyle.Info : AlertStyle.Success);
-    }
-
-    void OnMessageSent(string message)
-    {
-        Debug.WriteLine($"Message sent: {message}", AlertStyle.Info);
-    }
-
-    void OnResponseReceived(string response)
-    {
-        Debug.WriteLine($"AI Response received: {response.Substring(0, Math.Min(50, response.Length))}...", AlertStyle.Success);
-    }
-
-    void OnChatCleared()
-    {
-        Debug.WriteLine("Chat cleared", AlertStyle.Warning);
     }
 }
