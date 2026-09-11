@@ -21,7 +21,7 @@ namespace PPMTool.Services
         public ReadOnlySqlExecutorService(IConfiguration configuration)
         {
             // Get existing DB connection strings and modify them to be read-only if possible.
-            var connectionString = configuration.GetConnectionString("PPMToolContextConnection");
+            connectionString = configuration.GetConnectionString("PPMToolContextConnection");
             var dbProvider = configuration.GetValue<string>("DbProvider").Clean();
             if (string.IsNullOrEmpty(connectionString))
             {
@@ -83,7 +83,7 @@ namespace PPMTool.Services
                 await command.ExecuteReaderAsync(cancellationToken);
 
             // Read the results into a list of dictionaries, where each dictionary represents a row
-            var rows = new List<Dictionary<string, object?>>();
+            var rows = new List<Dictionary<string, object>>();
             const int maximumRows = 1000;
 
             while (await reader.ReadAsync(cancellationToken))
@@ -94,7 +94,7 @@ namespace PPMTool.Services
                     break;
                 }
 
-                var row = new Dictionary<string, object?>(
+                var row = new Dictionary<string, object>(
                     StringComparer.OrdinalIgnoreCase);
 
                 // Populate the dictionary with column names and their corresponding values
