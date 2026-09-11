@@ -101,10 +101,83 @@ namespace PPMTool.Services
             }
 
             sb.AppendLine();
-            sb.AppendLine("Only use tables, columns and relationships that are documented below.");
-            sb.AppendLine();
-            sb.AppendLine("DATABASE SCHEMA");
-            sb.AppendLine("================");
+            sb.AppendLine("""
+                PURPOSE
+                =======
+
+                You answer questions about data stored within CapX.
+
+                Only use tables, columns, enum values and relationships
+                documented in this prompt.
+
+                RULES
+                =====
+
+                1. Never invent database values.
+
+                2. Never invent table names, column names,
+                   relationships or enum values.
+
+                3. Use only information documented in this prompt.
+
+                4. If information cannot be determined from the
+                   documented schema, clearly state this.
+
+                5. Prefer aggregate queries (COUNT, SUM, AVG,
+                   MIN, MAX) over returning large raw datasets.
+
+                6. When filtering enum values, use the integer
+                   values documented in the ENUMERATIONS section.
+
+                7. Use SQL syntax compatible with the configured
+                   database provider.
+
+                8. Consider nullable columns when writing joins
+                   and filters.
+
+                9. When answering analytical questions, explain
+                   the assumptions used.
+
+                10. Do not assume a relationship exists unless it
+                    is explicitly listed in the RELATIONSHIPS
+                    section.
+
+                ENTITY NOTES
+                ============
+
+                Projects
+                ---------
+                Represents work requested from the Research
+                Software Engineering team.
+
+                SubTasks
+                --------
+                Represents planned project work packages.
+
+                Resources
+                ---------
+                Represents allocation of people to SubTasks.
+
+                FundingSources
+                --------------
+                Represents sources of project funding and budget.
+
+                Payments
+                --------
+                Represents payments received or allocated to
+                projects and funding sources.
+
+                Invoices
+                --------
+                Represents invoices raised against projects.
+
+                Timesheets
+                ----------
+                Represents actual effort recorded by staff.
+
+                DATABASE SCHEMA
+                ===============
+            """);
 
             // List all tables, columns, and relationships in the database schema
             foreach (var entityType in model.GetEntityTypes()
@@ -126,6 +199,18 @@ namespace PPMTool.Services
 
                 // Add a blank line before each table for better readability
                 sb.AppendLine();
+
+                if (IsPureJoinTable(entityType))
+                {
+                    var tempFk = entityType.GetForeignKeys().ToList();
+
+                    sb.AppendLine(
+                        $"MANY_TO_MANY: " +
+                        $"{tempFk[0].PrincipalEntityType.GetTableName()} <-> " +
+                        $"{tempFk[1].PrincipalEntityType.GetTableName()}");
+
+                    sb.AppendLine($"JOIN_TABLE: {tableName}");
+                }
 
                 // Add the table name to the prompt
                 sb.AppendLine($"TABLE: {tableName}");
@@ -281,6 +366,20 @@ namespace PPMTool.Services
             }
 
             return clrType.Name.ToUpperInvariant();
+        }
+
+        /// <summary>
+        /// Determines if the given entity type represents a pure join table.
+        /// Characterised by having exactly two foreign keys and at most two properties (the foreign keys themselves).
+        /// </summary>
+        /// <param name="entityType"></param>
+        /// <returns></returns>
+        private static bool IsPureJoinTable(IEntityType entityType)
+        {
+            var foreignKeys = entityType.GetForeignKeys().Count();
+
+            return foreignKeys == 2 &&
+                   entityType.GetProperties().Count() <= 2;
         }
     }
 }
