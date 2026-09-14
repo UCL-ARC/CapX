@@ -9,7 +9,7 @@
     <RadzenStack Orientation="Radzen.Orientation.Vertical"
                  Gap="0.5rem"
                  class="ai-chat-stack">
-        <HintComponent Message="The agent runs a local LLM alongside the web application. It has a read-only connection to the database. You can use the agent to ask natural language queries about the data. For example, 'How many projects did we do for the faculty of humanities in 2026?'" />
+        <HintComponent Message="The agent runs a local LLM alongside the web application. It is fed a system prompt containing the DB schema and some semantic rules. THe LLM does not have direct access to the DB. You can use the agent to ask natural language queries about the data. For example, 'How many projects did we do for the faculty of humanities in 2026?'" />
         <RadzenAIChat UserAvatarText="@avatarText"
                       SessionId="@chatSessionId"
                       Placeholder="Ask me anything..."
