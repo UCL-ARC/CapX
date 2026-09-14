@@ -101,7 +101,7 @@ namespace PPMTool.Shared
                     $"{SettingsService.GetSetting(SettingType.ApplicationName)} Data Agent",
                     new Dictionary<string, object>()
                     {
-                        [nameof(AIChatComponent.ActiveUserId)] = activeUserPersonId
+                        [nameof(AIChatComponent.ActiveUserId)] = activeUserId
                     },
                     new SideDialogOptions
                     {
