@@ -2,6 +2,7 @@
 //
 // SPDX-License-Identifier: apache-2.0
 
+using Microsoft.EntityFrameworkCore;
 using PPMTool.Data;
 using PPMTool.Data.Context;
 using PPMTool.Data.Entities;
@@ -27,6 +28,11 @@ namespace PPMTool.Services
 
         public override void Delete(PPMToolContext context, FinancialReference entity, bool commitChanges = true)
         {
+            // Delete all associated FinancialReferenceValues before deleting the FinancialReference entity
+            var values = context.FinancialReferenceValues.Where(x => x.FinancialReferenceId == entity.FinancialReferenceId);
+            context.FinancialReferenceValues.RemoveRange(values);
+
+            // Now delete the FinancialReference entity
             context.FinancialReferences.Remove(entity);
             if (commitChanges) CommitChanges(context);
         }
@@ -38,7 +44,10 @@ namespace PPMTool.Services
         /// <returns>An enumerable collection of all financial reference entities in the context.</returns>
         public override IEnumerable<FinancialReference> GetAll(PPMToolContext context)
         {
-            return context.FinancialReferences;
+            // Retrieve all financial references and include their associated values
+            return context.FinancialReferences
+                .OrderBy(x => x.FinancialYear)
+                .Include(x => x.Values);
         }
 
         /// <summary>
@@ -73,9 +82,35 @@ namespace PPMTool.Services
             return entity.FinancialReferenceId;
         }
 
+        /// <summary>
+        /// Checks for duplicate financial references based on the financial year and value names. Returns true if a duplicate is detected, otherwise false.
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="entity"></param>
+        /// <returns></returns>
         public override bool DuplicateDetected(PPMToolContext context, FinancialReference entity)
         {
-            return context.FinancialReferences.Any(x => x.FinancialYear == entity.FinancialYear && x.FinancialReferenceId != entity.FinancialReferenceId);
+            var duplicateYear = context.FinancialReferences.Any(x => x.FinancialYear == entity.FinancialYear && x.FinancialReferenceId != entity.FinancialReferenceId);
+            var values = entity.Values ?? new List<FinancialReferenceValue>();
+
+            // Considered a duplicate reference set if any of the value names are the same (case insensitive) and not null or whitespace
+            var duplicateValueNames = values
+                .Where(x => !string.IsNullOrWhiteSpace(x.ValueName))
+                .GroupBy(x => x.ValueName.Trim().ToLower())
+                .Any(x => x.Count() > 1);
+
+            return duplicateYear || duplicateValueNames;
+        }
+
+        /// <summary>
+        /// Retrieves a financial reference entity by its primary key from the specified database context. Returns null if no matching entity is found.
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="financialReferenceId"></param>
+        /// <returns></returns>
+        internal FinancialReference GetById(PPMToolContext context, int financialReferenceId)
+        {
+            return GetAll(context).FirstOrDefault(x => x.FinancialReferenceId == financialReferenceId);
         }
 
         /// <summary>

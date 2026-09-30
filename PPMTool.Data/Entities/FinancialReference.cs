@@ -28,6 +28,11 @@ namespace PPMTool.Data.Entities
         public float RecoveryTarget { get; set; }
 
         /// <summary>
+        /// Flexible key-value financial reference values that belong to this financial year set.
+        /// </summary>
+        public virtual ICollection<FinancialReferenceValue> Values { get; set; } = new List<FinancialReferenceValue>();
+
+        /// <summary>
         /// Helper to get a financial year from a DateTime
         /// </summary>
         /// <param name="date"></param>

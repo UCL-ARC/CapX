@@ -25,6 +25,7 @@ namespace PPMTool.Data.Context
         public DbSet<WorkloadModelChange> WorkloadModelChanges { get; set; }
         public DbSet<Note> Notes { get; set; }
         public DbSet<FinancialReference> FinancialReferences { get; set; }
+        public DbSet<FinancialReferenceValue> FinancialReferenceValues { get; set; }
         public DbSet<Competency> Competencies { get; set; }
         public DbSet<CompetencyAssessment> CompetencyAssessments { get; set; }
         public DbSet<Invoice> Invoices { get; set; }
