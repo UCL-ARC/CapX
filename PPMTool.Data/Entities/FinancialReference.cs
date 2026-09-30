@@ -2,6 +2,7 @@
 //
 // SPDX-License-Identifier: apache-2.0
 
+using Microsoft.Extensions.Logging;
 using PPMTool.Data.Enums;
 using PPMTool.Data.Interfaces;
 
@@ -9,23 +10,20 @@ namespace PPMTool.Data.Entities
 {
     public class FinancialReference : ILoggableObject
     {
+        public const string Grade41CostsName = "Grade41Costs";
+        public const string Grade51CostsName = "Grade51Costs";
+        public const string Grade55CostsName = "Grade55Costs";
+        public const string Grade65CostsName = "Grade65Costs";
+        public const string Grade71CostsName = "Grade71Costs";
+        public const string Grade75CostsName = "Grade75Costs";
+        public const string RecoveryTargetName = "RecoveryTarget";
+
         public int FinancialReferenceId { get; set; }
 
+        /// <summary>
+        /// Unique financial year that identifies this set of financial reference values.
+        /// </summary>
         public int FinancialYear { get; set; } = DateTime.Today.Year;
-
-        public float Grade41Costs { get; set; }
-
-        public float Grade51Costs { get; set; }
-
-        public float Grade55Costs { get; set; }
-
-        public float Grade65Costs { get; set; }
-
-        public float Grade71Costs { get; set; }
-
-        public float Grade75Costs { get; set; }
-
-        public float RecoveryTarget { get; set; }
 
         /// <summary>
         /// Flexible key-value financial reference values that belong to this financial year set.
@@ -104,6 +102,49 @@ namespace PPMTool.Data.Entities
         }
 
         /// <summary>
+        /// Gets a value from the financial reference setby name, returning 0 if not found or if the key is null/empty.
+        /// Logs warnings if the key is missing or if the values collection is null.
+        /// </summary>
+        /// <param name="valueName"></param>
+        /// <param name="logger"></param>
+        /// <returns></returns>
+        public float GetValue(string valueName, ILogger? logger = null)
+        {
+            if (string.IsNullOrWhiteSpace(valueName))
+            {
+                logger?.LogWarning("FinancialReference [{FinancialReferenceId}] - {FinancialYear}: requested value with null/empty key. Returning 0.", FinancialReferenceId, FinancialYear);
+                return 0f;
+            }
+
+            if (Values == null)
+            {
+                logger?.LogWarning("FinancialReference [{FinancialReferenceId}] - {FinancialYear}: values collection is null when looking up '{ValueName}'. Returning 0.", FinancialReferenceId, FinancialYear, valueName);
+                return 0f;
+            }
+
+            var match = Values.FirstOrDefault(x =>
+                !string.IsNullOrWhiteSpace(x.ValueName)
+                && x.ValueName.Trim().Equals(valueName.Trim(), StringComparison.OrdinalIgnoreCase));
+
+            if (match == null)
+            {
+                logger?.LogWarning("FinancialReference [{FinancialReferenceId}] - {FinancialYear}: missing key '{ValueName}'. Returning 0.", FinancialReferenceId, FinancialYear, valueName);
+                return 0f;
+            }
+
+            return match.Value;
+        }
+
+        /// <summary>
+        /// Gets the recovery target value from the financial reference set.
+        /// </summary>
+        /// <returns></returns>
+        public float GetRecoveryTarget()
+        {
+            return GetValue(RecoveryTargetName);
+        }
+
+        /// <summary>
         /// Gets a suitable standard or junior figure from the financial references for annual costs
         /// </summary>
         /// <param name="rate"></param>
@@ -113,19 +154,19 @@ namespace PPMTool.Data.Entities
             // Junior Rate
             if (rate == Rate.Junior)
             {
-                return Grade51Costs;
+                return GetValue(Grade51CostsName);
             }
 
             // Standard Rate
             else if (rate == Rate.Standard)
             {
-                return Grade71Costs;
+                return GetValue(Grade71CostsName);
             }
 
             // Senior rate
             else
             {
-                return Grade75Costs;
+                return GetValue(Grade75CostsName);
             }
         }
 
@@ -141,17 +182,17 @@ namespace PPMTool.Data.Entities
         {
             if (grade <= 4)
             {
-                return Grade41Costs;
+                return GetValue(Grade41CostsName);
             }
             else if (grade == 5)
             {
-                return Grade55Costs;
+                return GetValue(Grade55CostsName);
             }
             else if (grade == 6)
             {
-                return Grade65Costs;
+                return GetValue(Grade65CostsName);
             }
-            return Grade75Costs;
+            return GetValue(Grade75CostsName);
         }
     }
 }

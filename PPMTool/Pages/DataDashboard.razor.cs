@@ -344,7 +344,7 @@ namespace PPMTool.Pages
 
                         // Compute how many weeks of this FY run within the window of the graph
                         proportionOfFY = FinancialReference.GetProportionOfFinancialYearInRange(currentFY, startDate, endDate);
-                        recoveryTargetPerWeek = currentFinRef.RecoveryTarget * proportionOfFY / 52;
+                        recoveryTargetPerWeek = currentFinRef.GetRecoveryTarget() * proportionOfFY / 52;
                     }
 
                     // Get the projects that are running at the start of the week (exclude those projects with no tasks as they will have "default" start date)

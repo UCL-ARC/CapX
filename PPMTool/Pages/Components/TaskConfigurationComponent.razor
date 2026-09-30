@@ -348,14 +348,8 @@ SPDX-License-Identifier: apache-2.0
                     double techCost = 0d;
                     double indirectCost = 0d;
 
-                    // Use switch to select rate only
-                    double resourceRate = ResourceRate switch
-                    {
-                        Rate.Junior => finRef.Grade51Costs,
-                        Rate.Standard => finRef.Grade71Costs,
-                        Rate.Senior => finRef.Grade75Costs,
-                        _ => throw new ArgumentOutOfRangeException(nameof(ResourceRate), ResourceRate, "Unsupported Rate!")
-                    };
+                    // Use reference helper to select the configured rate value
+                    double resourceRate = finRef.GetJuniorOrStandardAnnualCosts(ResourceRate);
 
                     // Calculate the costs
                     techCost = resourceRate * dayScaled;
