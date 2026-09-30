@@ -115,13 +115,6 @@ namespace PPMTool.Pages
                     return;
                 }
 
-                // Check that if finance is enabled, all cost value names are filled in
-                if (financeEnabled && dataGridEntities.Any(x => string.IsNullOrWhiteSpace(x.CostValueName)))
-                {
-                    SetErrorMessage(new StatusMessage("Cost key is required when Project Finance is enabled.", StatusMessage.MessageType.Error));
-                    return;
-                }
-
                 ClearErrorMessage();
 
                 // Update the person model, save to database, refresh the list and reset the model
