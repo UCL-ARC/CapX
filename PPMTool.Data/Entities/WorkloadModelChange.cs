@@ -17,6 +17,11 @@ namespace PPMTool.Data.Entities
         [Required]
         public int Grade { get; set; }
 
+        /// <summary>
+        /// The name of the cost value from the financial reference set for the FY at the start of the workload model change that is used to determine the salary cost for the individual.
+        /// </summary>
+        public string? CostValueName { get; set; }
+
         [Required]
         public DateTime ChangeDate { get; set; }
 

@@ -499,7 +499,7 @@ namespace PPMTool.Pages
                         wlmRSA += (float)activeModel.ArchitectureFTE;
                         try
                         {
-                            recoverableStaffCosts += (float)currentFinRef.GetMidGradeCosts(activeModel.Grade) * (float)activeModel.ProjectWorkFTE * proportionOfFY / 52;
+                            recoverableStaffCosts += (float)currentFinRef.GetAnnualCostForWorkloadModel(activeModel, Logger) * (float)activeModel.ProjectWorkFTE * proportionOfFY / 52;
                         }
                         catch (ArgumentException)
                         {
@@ -834,7 +834,8 @@ namespace PPMTool.Pages
                             ContextFactory,
                             PersonService,
                             ProjectService,
-                            FinancialReferenceService
+                            FinancialReferenceService,
+                            Logger
                         );
                         Debug.WriteLine($"** {totalData.Count()} recovery summary entries generated!");
 

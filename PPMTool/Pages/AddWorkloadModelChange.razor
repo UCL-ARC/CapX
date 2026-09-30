@@ -48,6 +48,14 @@ SPDX-License-Identifier: apache-2.0
                                 <RadzenNumeric class="radzen-numeric" TValue="int" Min="4" Step="1" Max="9" @bind-Value="c.Grade" />
                             </EditTemplate>
                         </RadzenDataGridColumn>
+                        @if (financeEnabled)
+                        {
+                            <RadzenDataGridColumn TItem="WorkloadModelChange" Property="CostValueName" Title="Cost Key" Width="12rem" MinWidth="10px">
+                                <EditTemplate Context="c">
+                                    <RadzenDropDown class="radzen-dropdown" Data="@GetCostValueOptions(c.ChangeDate)" @bind-Value="c.CostValueName" AllowClear="true" Placeholder="Select cost key" />
+                                </EditTemplate>
+                            </RadzenDataGridColumn>
+                        }
                         <RadzenDataGridColumn TItem="WorkloadModelChange" Property="ProjectWorkFTE" Title="Project" Width="7rem" MinWidth="10px">
                             <EditTemplate Context="c">
                                 <RadzenNumeric class="radzen-numeric" TValue="double" Min="@Convert.ToDecimal(0.0)" Step="0.001" Max="@Convert.ToDecimal(1.0)" @bind-Value="c.ProjectWorkFTE" />

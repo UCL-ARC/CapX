@@ -145,6 +145,50 @@ namespace PPMTool.Data.Entities
         }
 
         /// <summary>
+        /// Gets the default cost value name for a given grade, based on predefined mappings.
+        /// </summary>
+        /// <param name="grade"></param>
+        /// <returns></returns>
+        public static string GetDefaultCostValueNameForGrade(int grade)
+        {
+            if (grade <= 4)
+            {
+                return Grade41CostsName;
+            }
+            else if (grade == 5)
+            {
+                return Grade55CostsName;
+            }
+            else if (grade == 6)
+            {
+                return Grade65CostsName;
+            }
+
+            return Grade75CostsName;
+        }
+
+        /// <summary>
+        /// Gets the annual cost for a given workload model, using the cost value name specified in the workload model or a default based on the grade if not specified.
+        /// </summary>
+        /// <param name="workloadModel"></param>
+        /// <param name="logger"></param>
+        /// <returns></returns>
+        public double GetAnnualCostForWorkloadModel(WorkloadModelChange workloadModel, ILogger? logger = null)
+        {
+            if (workloadModel == null)
+            {
+                logger?.LogWarning("FinancialReference [{FinancialReferenceId}] - {FinancialYear}: workload model was null while resolving annual cost. Returning 0.", FinancialReferenceId, FinancialYear);
+                return 0;
+            }
+
+            var valueName = string.IsNullOrWhiteSpace(workloadModel.CostValueName)
+                ? GetDefaultCostValueNameForGrade(workloadModel.Grade)
+                : workloadModel.CostValueName;
+
+            return GetValue(valueName, logger);
+        }
+
+        /// <summary>
         /// Gets a suitable standard or junior figure from the financial references for annual costs
         /// </summary>
         /// <param name="rate"></param>
