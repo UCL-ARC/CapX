@@ -22,7 +22,7 @@ namespace PPMTool.Data.Helpers
         /// <param name="startDate">Window start date. If not provided, uses earliest project start.</param>
         /// <param name="endDate">Window end date. If not provided, uses latest project end.</param>
         /// <param name="tasksInWindow">The tasks in the window for assginments to be extract. If not provided, extracts subtasks from the projects in the window.</param>
-        /// <param name="shouldCalculateCosts">If false the chunks will use the cost values already attached to the resources. If true, the mid-grade cost calculator will be used to estimate the cost of the chunk and overwrite anything stored.</param>
+        /// <param name="shouldCalculateCosts">If false the chunks will use the cost values already attached to the resources. If true, costs are recomputed from financial reference values using the associated cost key and overwrite anything stored.</param>
         /// <param name="budgetDetails">An optional dictionary of information about the budget status of each resource assignment that can be added to the data if supplied and matched.</param>
         /// <returns></returns>
         public static IEnumerable<AssignmentChunk> GetAssignmentChunks(
@@ -310,12 +310,12 @@ namespace PPMTool.Data.Helpers
                 data.AddRange(taskChunks);
             }
 
-            // Add the mid-grade salary estimates and overwrite the planned costs if necessary or possible
+            // Add financial-reference-based salary estimates and overwrite the planned costs if necessary or possible
             if (finrefs != null)
             {
                 foreach (var chunk in data)
                 {
-                    // Cost estimate based on mid-grade salaries
+                    // Cost estimate based on the selected financial reference value key
                     chunk.RecomputeChunkCosts(finrefs, shouldCalculateCosts);
                 }
             }

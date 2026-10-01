@@ -49,9 +49,9 @@ namespace PPMTool.Data
         public string LowerOrgUnit { get; set; } = null!;
 
         /// <summary>
-        /// This is the estimated salary cost of the individual resource based on their grade and FTE -- essentially the cost to the department
+        /// This is the estimated salary cost of the individual resource based on their workload model and associated financial reference value -- essentially the cost to the department
         /// </summary>
-        [Description("Estimated salary cost based on mid-grade -- i.e. cost to the department for employing the person for this assignment period")]
+        [Description("Estimated salary cost based on workload-model-linked financial reference value -- i.e. cost to the department for employing the person for this assignment period")]
         public double SalaryCostEstimate { get; set; }
 
         /// <summary>
