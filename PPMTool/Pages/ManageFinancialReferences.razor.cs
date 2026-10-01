@@ -58,5 +58,14 @@ namespace PPMTool.Pages
         {
             Navigation.NavigateTo("managefinref/addfinancialreference/-1");
         }
+
+        /// <summary>
+        /// Navigates to the add page and pre-populates it by copying an existing reference set.
+        /// </summary>
+        /// <param name="entity"></param>
+        private void CopyReference(FinancialReference entity)
+        {
+            Navigation.NavigateTo($"managefinref/addfinancialreference/-1?copyFromFinancialReferenceId={entity.FinancialReferenceId}");
+        }
     }
 }

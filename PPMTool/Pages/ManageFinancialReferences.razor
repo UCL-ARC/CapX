@@ -51,9 +51,10 @@ SPDX-License-Identifier: apache-2.0
                         @(fin.Values != null && fin.Values.Count() > 0 ? string.Join(", ", fin.Values.Select(x => $"{x.ValueName}: {x.Value:C}")) : "")
                     </Template>
                 </RadzenDataGridColumn>
-                <RadzenDataGridColumn Frozen="true" FrozenPosition="FrozenColumnPosition.Right" TItem="FinancialReference" Filterable="false" Sortable="false" TextAlign="TextAlign.Center" Width="8rem" MinWidth="10px" Title="Actions">
+                <RadzenDataGridColumn Frozen="true" FrozenPosition="FrozenColumnPosition.Right" TItem="FinancialReference" Filterable="false" Sortable="false" TextAlign="TextAlign.Center" Width="12rem" MinWidth="10px" Title="Actions">
                     <Template Context="fin">
                         <RadzenButton Icon="edit" ButtonStyle="ButtonStyle.Light" Class="m-1" Click="@(args => EditReference(fin))" @onclick:stopPropagation="true" MouseEnter="@(args => ShowTooltip(args, "Edit"))" Disabled="@(!EditAuthorised)" />
+                        <RadzenButton Icon="content_copy" ButtonStyle="ButtonStyle.Primary" Class="m-1" Click="@(args => CopyReference(fin))" @onclick:stopPropagation="true" MouseEnter="@(args => ShowTooltip(args, "Duplicate"))" Disabled="@(!EditAuthorised)" />
                         <RadzenButton Icon="delete" ButtonStyle="ButtonStyle.Danger" Class="m-1" Click="@(args => DeleteReference(fin))" @onclick:stopPropagation="true" MouseEnter="@(args => ShowTooltip(args, "Delete"))" Disabled="@(!EditAuthorised)" />
                     </Template>
                 </RadzenDataGridColumn>

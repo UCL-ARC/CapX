@@ -16,6 +16,10 @@ namespace PPMTool.Pages
         [Parameter]
         public int FinancialReferenceId { get; set; }
 
+        [Parameter]
+        [SupplyParameterFromQuery(Name = "copyFromFinancialReferenceId")]
+        public int? CopyFromFinancialReferenceId { get; set; }
+
         [Inject]
         private FinancialReferenceService FinancialReferenceService { get; set; }
 
@@ -29,6 +33,24 @@ namespace PPMTool.Pages
             {
                 financialReference = FinancialReferenceService.GetById(Context, FinancialReferenceId);
                 dataGridEntities = financialReference?.Values?.ToList() ?? new List<FinancialReferenceValue>();
+            }
+            else if (CopyFromFinancialReferenceId.HasValue && CopyFromFinancialReferenceId.Value > 0)
+            {
+                var sourceReference = FinancialReferenceService.GetById(Context, CopyFromFinancialReferenceId.Value);
+
+                financialReference = new FinancialReference
+                {
+                    FinancialYear = (sourceReference?.FinancialYear ?? DateTime.Today.Year) + 1,
+                    Values = (sourceReference?.Values ?? Enumerable.Empty<FinancialReferenceValue>())
+                        .Select(x => new FinancialReferenceValue
+                        {
+                            ValueName = x.ValueName,
+                            Value = x.Value
+                        })
+                        .ToList()
+                };
+
+                dataGridEntities = financialReference.Values.ToList();
             }
             else
             {
