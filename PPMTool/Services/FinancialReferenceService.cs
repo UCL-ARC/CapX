@@ -1,4 +1,4 @@
-﻿// SPDX-FileCopyrightText: 2026 University of Manchester
+// SPDX-FileCopyrightText: 2026 University of Manchester
 //
 // SPDX-License-Identifier: apache-2.0
 
@@ -93,10 +93,10 @@ namespace PPMTool.Services
             var duplicateYear = context.FinancialReferences.Any(x => x.FinancialYear == entity.FinancialYear && x.FinancialReferenceId != entity.FinancialReferenceId);
             var values = entity.Values ?? new List<FinancialReferenceValue>();
 
-            // Considered a duplicate reference set if any of the value names are the same (case insensitive) and not null or whitespace
+            // Considered a duplicate reference set if any of the key names are the same (case insensitive) and not null or whitespace
             var duplicateValueNames = values
-                .Where(x => !string.IsNullOrWhiteSpace(x.ValueName))
-                .GroupBy(x => x.ValueName.Trim().ToLower())
+                .Where(x => !string.IsNullOrWhiteSpace(x.FinancialReferenceValueSet?.Name))
+                .GroupBy(x => x.FinancialReferenceValueSet.Name.Trim().ToLower())
                 .Any(x => x.Count() > 1);
 
             return duplicateYear || duplicateValueNames;
@@ -114,16 +114,16 @@ namespace PPMTool.Services
         }
 
         /// <summary>
-        /// Gets available cost value names from the suitable financial reference set for the provided date.
+        /// Gets available financial reference values from the suitable financial reference set for the provided date.
         /// </summary>
         /// <param name="context"></param>
         /// <param name="date"></param>
         /// <returns></returns>
-        public IEnumerable<string> GetCostValueOptionsForDate(PPMToolContext context, DateTime date)
+        public IEnumerable<FinancialReferenceValue> GetCostValueOptionsForDate(PPMToolContext context, DateTime date)
         {
             if (context == null || !context.FinancialReferences.Any())
             {
-                return Enumerable.Empty<string>();
+                return Enumerable.Empty<FinancialReferenceValue>();
             }
 
             var finRef = GetFinancialReferenceForDate(context, date);
@@ -131,27 +131,27 @@ namespace PPMTool.Services
         }
 
         /// <summary>
-        /// Gets available cost value names from the provided financial reference set.
+        /// Gets available financial reference values from the provided financial reference set.
         /// </summary>
         /// <param name="finRef"></param>
         /// <returns></returns>
-        public IEnumerable<string> GetCostValueOptions(FinancialReference finRef)
+        public IEnumerable<FinancialReferenceValue> GetCostValueOptions(FinancialReference finRef)
         {
             // No values in the financial reference set
             if (finRef?.Values == null)
             {
-                return Enumerable.Empty<string>();
+                return Enumerable.Empty<FinancialReferenceValue>();
             }
 
             // Subset of valid values
             var values = finRef.Values
-                .Where(x => !string.IsNullOrWhiteSpace(x.ValueName));
+                .Where(x => !string.IsNullOrWhiteSpace(x.FinancialReferenceValueSet?.Name));
 
-            // Returns distinct values ordered by name
+            // Returns distinct values ordered by key name
             return values
-                .Select(x => x.ValueName.Trim())
-                .Distinct(StringComparer.OrdinalIgnoreCase)
-                .OrderBy(x => x)
+                .GroupBy(x => x.FinancialReferenceValueSet.Name.Trim(), StringComparer.OrdinalIgnoreCase)
+                .Select(x => x.First())
+                .OrderBy(x => x.FinancialReferenceValueSet.Name)
                 .ToList();
         }
 

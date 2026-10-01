@@ -1,4 +1,4 @@
-﻿@*
+@*
 SPDX-FileCopyrightText: 2026 University of Manchester
 
 SPDX-License-Identifier: apache-2.0
@@ -50,9 +50,19 @@ SPDX-License-Identifier: apache-2.0
                         </RadzenDataGridColumn>
                         @if (financeEnabled)
                         {
-                            <RadzenDataGridColumn TItem="WorkloadModelChange" Property="CostValueName" Title="Cost Key" Width="12rem" MinWidth="10px">
+                            <RadzenDataGridColumn TItem="WorkloadModelChange" Property="CostValueSetId" Title="Cost Key" Width="12rem" MinWidth="10px">
+                                <Template Context="c">
+                                    @c.CostValueSet?.Name
+                                </Template>
                                 <EditTemplate Context="c">
-                                    <RadzenDropDown class="radzen-dropdown m-0" Data="@GetCostValueOptions(c.ChangeDate)" @bind-Value="c.CostValueName" AllowClear="true" Placeholder="Select cost key" />
+                                    <RadzenDropDown class="radzen-dropdown m-0"
+                                                    Data="@GetCostValueOptions(c.ChangeDate).Select(x => x.FinancialReferenceValueSet).Where(x => x != null).DistinctBy(x => x.FinancialReferenceValueSetId).OrderBy(x => x.Name)"
+                                                    TextProperty="Name"
+                                                    ValueProperty="FinancialReferenceValueSetId"
+                                                    TValue="int?"
+                                                    @bind-Value="c.CostValueSetId"
+                                                    AllowClear="true"
+                                                    Placeholder="Select cost key" />
                                 </EditTemplate>
                             </RadzenDataGridColumn>
                         }

@@ -8,17 +8,25 @@ using PPMTool.Data.Interfaces;
 namespace PPMTool.Data.Entities
 {
     /// <summary>
-    /// Represents a key-value pair of financial reference data that belongs to a specific financial year set.
+    /// Represents the numeric value of a stable financial reference value set for a specific financial year set.
     /// </summary>
     public class FinancialReferenceValue : ILoggableObject
     {
         public int FinancialReferenceValueId { get; set; }
 
+        /// <summary>
+        /// The financial reference value set that this value represents.
+        /// </summary>
         [Required]
-        public string ValueName { get; set; } = null!;
+        public virtual FinancialReferenceValueSet FinancialReferenceValueSet { get; set; } = null!;
+
+        public int FinancialReferenceValueSetId { get; set; }
 
         public float Value { get; set; }
 
+        /// <summary>
+        /// Foreign key to the financial reference set that this value belongs to.
+        /// </summary>
         [Required]
         public virtual FinancialReference FinancialReference { get; set; } = null!;
 
@@ -30,7 +38,7 @@ namespace PPMTool.Data.Entities
         /// <returns>The sensible name.</returns>
         public string GetSensibleObjectName()
         {
-            return $"{FinancialReference?.GetSensibleObjectName()} | {ValueName}";
+            return $"{FinancialReference?.GetSensibleObjectName()} | {FinancialReferenceValueSet?.Name}";
         }
     }
 }

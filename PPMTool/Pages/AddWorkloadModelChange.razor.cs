@@ -51,10 +51,10 @@ namespace PPMTool.Pages
                 entityToInsert.Grade = 6;
             }
 
-            // Cost key must be explicitly selected when Project Finance is enabled
+            // Cost value key relationship can be selected when Project Finance is enabled
             if (financeEnabled)
             {
-                entityToInsert.CostValueName = string.Empty;
+                entityToInsert.CostValueSetId = null;
             }
 
             await dataGrid.InsertRow(entityToInsert);
@@ -73,11 +73,11 @@ namespace PPMTool.Pages
         /// </summary>
         /// <param name="changeDate"></param>
         /// <returns></returns>
-        private IEnumerable<string> GetCostValueOptions(DateTime changeDate)
+        private IEnumerable<FinancialReferenceValue> GetCostValueOptions(DateTime changeDate)
         {
             if (!financeEnabled)
             {
-                return Enumerable.Empty<string>();
+                return Enumerable.Empty<FinancialReferenceValue>();
             }
 
             return FinancialReferenceService.GetCostValueOptionsForDate(Context, changeDate);
@@ -96,9 +96,9 @@ namespace PPMTool.Pages
                 }
 
                 // Log warning if saving with missing cost keys while Project Finance is enabled, as this will use zero-cost fallback in finance calculations
-                if (financeEnabled && dataGridEntities.Any(x => string.IsNullOrWhiteSpace(x.CostValueName)))
+                if (financeEnabled && dataGridEntities.Any(x => x.CostValueSetId == null))
                 {
-                    LogWarning("Saving WLM changes with one or more missing cost keys while Project Finance is enabled. Missing keys will use zero-cost fallback in finance calculations.");
+                    LogWarning("Saving WLM changes with one or more missing cost key links while Project Finance is enabled. Missing links will use zero-cost fallback in finance calculations.");
                 }
 
                 ClearErrorMessage();

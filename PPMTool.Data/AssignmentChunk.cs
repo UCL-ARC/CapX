@@ -1,4 +1,4 @@
-﻿// SPDX-FileCopyrightText: 2026 University of Manchester
+// SPDX-FileCopyrightText: 2026 University of Manchester
 //
 // SPDX-License-Identifier: apache-2.0
 
@@ -19,7 +19,10 @@ namespace PPMTool.Data
         [Description("The grade of the person for the duration of this assignment")]
         public int Grade { get; set; }
 
-        [Description("Financial reference value key used to compute costs for this assignment chunk")]
+        [Description("Financial reference key relationship used to compute costs for this assignment chunk")]
+        public int? CostValueSetId { get; set; }
+
+        [Description("Financial reference key name used for display in this assignment chunk")]
         public string? CostValueName { get; set; }
 
         /// <summary>
@@ -111,6 +114,7 @@ namespace PPMTool.Data
         {
             EmployeeName = taskToCopy.EmployeeName;
             Grade = taskToCopy.Grade;
+            CostValueSetId = taskToCopy.CostValueSetId;
             CostValueName = taskToCopy.CostValueName;
             FTE = taskToCopy.FTE;
             BilledFTE = taskToCopy.BilledFTE;
@@ -144,7 +148,21 @@ namespace PPMTool.Data
         {
             try
             {
-                var annualCosts = finrefs.GetSuitableFinancialReference(FinancialYear).GetValue(CostValueName);
+                var finRef = finrefs.GetSuitableFinancialReference(FinancialYear);
+                var annualCosts = 0f;
+
+                // If a cost value key has been explicitly selected then use that to get the annual costs, otherwise fall back to using the cost value name if available
+                if (CostValueSetId != null)
+                {
+                    annualCosts = finRef.Values?.FirstOrDefault(x => x.FinancialReferenceValueSetId == CostValueSetId)?.Value ?? 0f;
+                }
+
+                // If the annual costs are still zero then try to use the cost value name to get the annual costs
+                if (annualCosts == 0f && !string.IsNullOrWhiteSpace(CostValueName))
+                {
+                    annualCosts = finRef.GetValue(CostValueName);
+                }
+
                 var fractionOfYear = (EndDate.Date.Subtract(StartDate.Date).TotalDays + 1) / 365d;
 
                 // The cost of a resource uses the BilledFTE which means it includes indirects if the model permits it

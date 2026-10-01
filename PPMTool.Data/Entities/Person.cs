@@ -1,4 +1,4 @@
-﻿// SPDX-FileCopyrightText: 2026 University of Manchester
+// SPDX-FileCopyrightText: 2026 University of Manchester
 //
 // SPDX-License-Identifier: apache-2.0
 
@@ -127,12 +127,12 @@ namespace PPMTool.Data.Entities
         }
 
         /// <summary>
-        /// Checks whether this person has any workload model changes without an explicit cost key.
+        /// Checks whether this person has any workload model changes without an explicit cost value key relationship.
         /// </summary>
         /// <returns></returns>
         public bool HasWorkloadModelsWithoutCostKey()
         {
-            return WorkloadModelChanges?.Any(x => string.IsNullOrWhiteSpace(x.CostValueName)) ?? false;
+            return WorkloadModelChanges?.Any(x => x.CostValueSetId == null) ?? false;
         }
 
         /// <summary>

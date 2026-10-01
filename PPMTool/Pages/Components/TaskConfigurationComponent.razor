@@ -1,4 +1,4 @@
-﻿@*
+@*
 SPDX-FileCopyrightText: 2026 University of Manchester
 
 SPDX-License-Identifier: apache-2.0
@@ -77,6 +77,8 @@ SPDX-License-Identifier: apache-2.0
                 <RadzenDropDown class="radzen-dropdown"
                                 @bind-Value="Model.CostValueName"
                                 Data="@GetCostValueOptions(Model.StartDate)"
+                                TextProperty="FinancialReferenceValueSet.Name"
+                                ValueProperty="FinancialReferenceValueSet.Name"
                                 Name="CostValueName"
                                 Disabled="@ReadOnly"
                                 Change="@(() => ValueChanged(nameof(Model.CostValueName)))" />
@@ -189,7 +191,7 @@ SPDX-License-Identifier: apache-2.0
 
         if (string.IsNullOrWhiteSpace(Model.CostValueName))
         {
-            Model.CostValueName = GetCostValueOptions(Model.StartDate).FirstOrDefault() ?? string.Empty;
+            Model.CostValueName = GetCostValueOptions(Model.StartDate).FirstOrDefault()?.FinancialReferenceValueSet?.Name ?? string.Empty;
         }
 
         ValueChanged(nameof(Model.StartDate));
@@ -200,7 +202,7 @@ SPDX-License-Identifier: apache-2.0
     /// </summary>
     /// <param name="date"></param>
     /// <returns></returns>
-    private IEnumerable<string> GetCostValueOptions(DateTime date)
+    private IEnumerable<FinancialReferenceValue> GetCostValueOptions(DateTime date)
     {
         return FinancialReferenceService.GetCostValueOptionsForDate(Context, date);
     }

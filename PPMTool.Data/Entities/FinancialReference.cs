@@ -1,4 +1,4 @@
-﻿// SPDX-FileCopyrightText: 2026 University of Manchester
+// SPDX-FileCopyrightText: 2026 University of Manchester
 //
 // SPDX-License-Identifier: apache-2.0
 
@@ -93,15 +93,15 @@ namespace PPMTool.Data.Entities
         }
 
         /// <summary>
-        /// Gets a value from the financial reference setby name, returning 0 if not found or if the key is null/empty.
+        /// Gets a value from the financial reference set by stable key name, returning 0 if not found or if the key is null/empty.
         /// Logs warnings if the key is missing or if the values collection is null.
         /// </summary>
-        /// <param name="valueName"></param>
+        /// <param name="keyName"></param>
         /// <param name="logger"></param>
         /// <returns></returns>
-        public float GetValue(string? valueName, ILogger? logger = null)
+        public float GetValue(string? keyName, ILogger? logger = null)
         {
-            if (string.IsNullOrWhiteSpace(valueName))
+            if (string.IsNullOrWhiteSpace(keyName))
             {
                 logger?.LogWarning("FinancialReference [{FinancialReferenceId}] - {FinancialYear}: requested value with null/empty key. Returning 0.", FinancialReferenceId, FinancialYear);
                 return 0f;
@@ -109,17 +109,48 @@ namespace PPMTool.Data.Entities
 
             if (Values == null)
             {
-                logger?.LogWarning("FinancialReference [{FinancialReferenceId}] - {FinancialYear}: values collection is null when looking up '{ValueName}'. Returning 0.", FinancialReferenceId, FinancialYear, valueName);
+                logger?.LogWarning("FinancialReference [{FinancialReferenceId}] - {FinancialYear}: values collection is null when looking up '{KeyName}'. Returning 0.", FinancialReferenceId, FinancialYear, keyName);
                 return 0f;
             }
 
             var match = Values.FirstOrDefault(x =>
-                !string.IsNullOrWhiteSpace(x.ValueName)
-                && x.ValueName.Trim().Equals(valueName.Trim(), StringComparison.OrdinalIgnoreCase));
+                !string.IsNullOrWhiteSpace(x.FinancialReferenceValueSet?.Name)
+                && x.FinancialReferenceValueSet.Name.Trim().Equals(keyName.Trim(), StringComparison.OrdinalIgnoreCase));
 
             if (match == null)
             {
-                logger?.LogWarning("FinancialReference [{FinancialReferenceId}] - {FinancialYear}: missing key '{ValueName}'. Returning 0.", FinancialReferenceId, FinancialYear, valueName);
+                logger?.LogWarning("FinancialReference [{FinancialReferenceId}] - {FinancialYear}: missing key '{KeyName}'. Returning 0.", FinancialReferenceId, FinancialYear, keyName);
+                return 0f;
+            }
+
+            return match.Value;
+        }
+
+        /// <summary>
+        /// Gets a value from the financial reference set by stable key identifier, returning 0 if not found.
+        /// </summary>
+        /// <param name="financialReferenceKeyId"></param>
+        /// <param name="logger"></param>
+        /// <returns></returns>
+        public float GetValue(int? financialReferenceKeyId, ILogger? logger = null)
+        {
+            if (financialReferenceKeyId == null)
+            {
+                logger?.LogWarning("FinancialReference [{FinancialReferenceId}] - {FinancialYear}: requested value with null key id. Returning 0.", FinancialReferenceId, FinancialYear);
+                return 0f;
+            }
+
+            if (Values == null)
+            {
+                logger?.LogWarning("FinancialReference [{FinancialReferenceId}] - {FinancialYear}: values collection is null when looking up key id '{FinancialReferenceValueSetId}'. Returning 0.", FinancialReferenceId, FinancialYear, financialReferenceKeyId);
+                return 0f;
+            }
+
+            var match = Values.FirstOrDefault(x => x.FinancialReferenceValueSetId == financialReferenceKeyId.Value);
+
+            if (match == null)
+            {
+                logger?.LogWarning("FinancialReference [{FinancialReferenceId}] - {FinancialYear}: missing key id '{FinancialReferenceValueSetId}'. Returning 0.", FinancialReferenceId, FinancialYear, financialReferenceKeyId);
                 return 0f;
             }
 
@@ -140,13 +171,13 @@ namespace PPMTool.Data.Entities
                 return 0;
             }
 
-            if (string.IsNullOrWhiteSpace(workloadModel.CostValueName))
+            if (workloadModel.CostValueSetId == null)
             {
                 logger?.LogWarning("FinancialReference [{FinancialReferenceId}] - {FinancialYear}: workload model {WorkloadModelChangeId} has no cost key selected. Returning 0.", FinancialReferenceId, FinancialYear, workloadModel.WorkloadModelChangeId);
                 return 0;
             }
 
-            return GetValue(workloadModel.CostValueName, logger);
+            return GetValue(workloadModel.CostValueSetId, logger);
         }
     }
 }

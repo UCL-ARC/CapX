@@ -1,4 +1,4 @@
-﻿// SPDX-FileCopyrightText: 2026 University of Manchester
+// SPDX-FileCopyrightText: 2026 University of Manchester
 //
 // SPDX-License-Identifier: apache-2.0
 
@@ -82,7 +82,7 @@ namespace PPMTool.Data.Helpers
 
             // Are there any changes in grade or selected cost key for this person?
             var changesInGradeOrCostKey = wlms
-                .DistinctBy(x => $"{x.Grade}|{x.CostValueName?.Trim()?.ToLowerInvariant()}")
+                .DistinctBy(x => $"{x.Grade}|{x.CostValueSetId}")
                 .Count() > 1;
 
             // Are there any changes in financial year in the window?
@@ -131,7 +131,8 @@ namespace PPMTool.Data.Helpers
                 {
                     EmployeeName = person.Name,
                     Grade = defaultWLM.Grade,
-                    CostValueName = defaultWLM.CostValueName,
+                    CostValueSetId = defaultWLM.CostValueSetId,
+                    CostValueName = defaultWLM.CostValueSet?.Name,
                     FTE = resource.AssignmentFTE,
                     BilledFTE = resource.BilledFTE,
                     ProjectId = project.RTP,
@@ -173,7 +174,7 @@ namespace PPMTool.Data.Helpers
                         var wlmBefore = person.GetWorkloadModelOnDateOrDefault(change.ChangeDate.AddDays(-1));
 
                         // Define a new task chunk for before period if necessary
-                        if (wlmBefore.Grade != change.Grade || wlmBefore.CostValueName?.Clean() != change.CostValueName?.Clean())
+                        if (wlmBefore.Grade != change.Grade || wlmBefore.CostValueSetId != change.CostValueSetId)
                         {
                             var startDateOfNewChunk = tempChunks.Count > 0 ?
                                 new DateTime(tempChunks.Last().EndDate.AddDays(1).Ticks) :
@@ -195,7 +196,8 @@ namespace PPMTool.Data.Helpers
                             tempChunks.Add(new AssignmentChunk(initialChunk)
                             {
                                 Grade = wlmBefore.Grade,
-                                CostValueName = wlmBefore.CostValueName,
+                                CostValueSetId = wlmBefore.CostValueSetId,
+                                CostValueName = wlmBefore.CostValueSet?.Name,
                                 StartDate = startDateOfNewChunk,
                                 EndDate = endDateOfNewChunk,
                                 PlannedCost = initialChunk.PlannedCost * proportionOfInitialChunk,
@@ -222,7 +224,8 @@ namespace PPMTool.Data.Helpers
                         tempChunks.Add(new AssignmentChunk(initialChunk)
                         {
                             Grade = wlmOnFinalChunkStart.Grade,
-                            CostValueName = wlmOnFinalChunkStart.CostValueName,
+                            CostValueSetId = wlmOnFinalChunkStart.CostValueSetId,
+                            CostValueName = wlmOnFinalChunkStart.CostValueSet?.Name,
                             StartDate = finalChunkStart,
                             EndDate = finalChunkEnd,
                             PlannedCost = remainingCosts > 0 ? remainingCosts : 0,

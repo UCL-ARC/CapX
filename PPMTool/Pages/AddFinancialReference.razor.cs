@@ -32,19 +32,38 @@ namespace PPMTool.Pages
             if (FinancialReferenceId > 0)
             {
                 financialReference = FinancialReferenceService.GetById(Context, FinancialReferenceId);
-                dataGridEntities = financialReference?.Values?.ToList() ?? new List<FinancialReferenceValue>();
+
+                // If the financial reference set is not found, we will create a new one with the provided FinancialReferenceId.
+                // This is to handle cases where the user navigates directly to the edit page with an invalid ID.
+                dataGridEntities = financialReference?.Values?.Select(x => new FinancialReferenceValue
+                {
+                    FinancialReferenceValueId = x.FinancialReferenceValueId,
+                    FinancialReferenceValueSetId = x.FinancialReferenceValueSetId,
+                    FinancialReferenceValueSet = x.FinancialReferenceValueSet ?? new FinancialReferenceValueSet { Name = string.Empty },
+                    Value = x.Value,
+                    FinancialReferenceId = x.FinancialReferenceId,
+                    FinancialReference = x.FinancialReference
+                }).ToList() ?? new List<FinancialReferenceValue>();
             }
+
+            // If the FinancialReferenceId is not provided, but a CopyFromFinancialReferenceId is provided, we will copy the values from the source financial reference set to create a new one.
             else if (CopyFromFinancialReferenceId.HasValue && CopyFromFinancialReferenceId.Value > 0)
             {
+                // Fetch the source financial reference set to copy from
                 var sourceReference = FinancialReferenceService.GetById(Context, CopyFromFinancialReferenceId.Value);
 
+                // If the source reference is null then it just produces a blank entry
                 financialReference = new FinancialReference
                 {
                     FinancialYear = (sourceReference?.FinancialYear ?? DateTime.Today.Year) + 1,
                     Values = (sourceReference?.Values ?? Enumerable.Empty<FinancialReferenceValue>())
                         .Select(x => new FinancialReferenceValue
                         {
-                            ValueName = x.ValueName,
+                            FinancialReferenceValueSet = new FinancialReferenceValueSet
+                            {
+                                Name = x.FinancialReferenceValueSet?.Name ?? string.Empty,
+                                Description = x.FinancialReferenceValueSet?.Description
+                            },
                             Value = x.Value
                         })
                         .ToList()
@@ -85,16 +104,17 @@ namespace PPMTool.Pages
             ClearErrorMessage();
             financialReference.Values.Clear();
 
-            // Trim whitespace from value names and associate each value with the financial reference set
+            // Trim whitespace from key names and associate each value with the financial reference set
             foreach (var value in dataGridEntities)
             {
-                value.ValueName = value.ValueName?.Trim() ?? string.Empty;
+                value.FinancialReferenceValueSet ??= new FinancialReferenceValueSet();
+                value.FinancialReferenceValueSet.Name = value.FinancialReferenceValueSet.Name?.Trim() ?? string.Empty;
                 value.FinancialReference = financialReference;
                 financialReference.Values.Add(value);
             }
 
-            // Validate that all values have a name
-            if (financialReference.Values.Any(x => string.IsNullOrWhiteSpace(x.ValueName)))
+            // Validate that all values have a key name
+            if (financialReference.Values.Any(x => string.IsNullOrWhiteSpace(x.FinancialReferenceValueSet?.Name)))
             {
                 SetErrorMessage(new StatusMessage("All values must have a name.", StatusMessage.MessageType.Error));
                 return;

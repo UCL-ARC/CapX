@@ -1,4 +1,4 @@
-﻿@*
+@*
 SPDX-FileCopyrightText: 2026 University of Manchester
 
 SPDX-License-Identifier: apache-2.0
@@ -48,7 +48,7 @@ SPDX-License-Identifier: apache-2.0
                 <RadzenDataGridColumn TItem="FinancialReference" Property="FinancialYear" Title="Financial Year" Width="12rem" MinWidth="10px" />
                 <RadzenDataGridColumn TItem="FinancialReference" Property="Values" Title="Values" MinWidth="10px" Filterable="false" Sortable="false">
                     <Template Context="fin">
-                        @(fin.Values != null && fin.Values.Count() > 0 ? string.Join(", ", fin.Values.Select(x => $"{x.ValueName}: {x.Value:C}")) : "")
+                        @(fin.Values != null && fin.Values.Count() > 0 ? string.Join(", ", fin.Values.Select(x => $"{x.FinancialReferenceValueSet?.Name}: {x.Value:C}")) : "")
                     </Template>
                 </RadzenDataGridColumn>
                 <RadzenDataGridColumn Frozen="true" FrozenPosition="FrozenColumnPosition.Right" TItem="FinancialReference" Filterable="false" Sortable="false" TextAlign="TextAlign.Center" Width="12rem" MinWidth="10px" Title="Actions">

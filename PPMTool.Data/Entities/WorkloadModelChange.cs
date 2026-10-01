@@ -1,4 +1,4 @@
-﻿// SPDX-FileCopyrightText: 2026 University of Manchester
+// SPDX-FileCopyrightText: 2026 University of Manchester
 //
 // SPDX-License-Identifier: apache-2.0
 
@@ -18,9 +18,14 @@ namespace PPMTool.Data.Entities
         public int Grade { get; set; }
 
         /// <summary>
-        /// The name of the cost value from the financial reference set for the FY at the start of the workload model change that is used to determine the salary cost for the individual.
+        /// Foreign key to the selected stable financial reference value set used for salary cost calculations.
         /// </summary>
-        public string? CostValueName { get; set; }
+        public int? CostValueSetId { get; set; }
+
+        /// <summary>
+        /// Selected stable financial reference value set used for salary cost calculations.
+        /// </summary>
+        public virtual FinancialReferenceValueSet? CostValueSet { get; set; }
 
         [Required]
         public DateTime ChangeDate { get; set; }
