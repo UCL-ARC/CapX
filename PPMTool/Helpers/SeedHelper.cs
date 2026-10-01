@@ -1286,13 +1286,13 @@ namespace PPMTool.Helpers
                         FinancialYear = fy - 1,
                         Values = new List<FinancialReferenceValue>
                         {
-                            new() { ValueName = FinancialReference.Grade41CostsName, Value = 33333.55f },
-                            new() { ValueName = FinancialReference.Grade51CostsName, Value = 38011.97f },
-                            new() { ValueName = FinancialReference.Grade55CostsName, Value = 43172.16f },
-                            new() { ValueName = FinancialReference.Grade65CostsName, Value = 50935.8f },
-                            new() { ValueName = FinancialReference.Grade71CostsName, Value = 57458.16f },
-                            new() { ValueName = FinancialReference.Grade75CostsName, Value = 64797.29f },
-                            new() { ValueName = FinancialReference.RecoveryTargetName, Value = 1118849f }
+                            new() { ValueName = "Grade41Costs", Value = 33333.55f },
+                            new() { ValueName = "Grade51Costs", Value = 38011.97f },
+                            new() { ValueName = "Grade55Costs", Value = 43172.16f },
+                            new() { ValueName = "Grade65Costs", Value = 50935.8f },
+                            new() { ValueName = "Grade71Costs", Value = 57458.16f },
+                            new() { ValueName = "Grade75Costs", Value = 64797.29f },
+                            new() { ValueName = "RecoveryTarget", Value = 1118849f }
                         }
                     },
                     new FinancialReference
@@ -1300,13 +1300,13 @@ namespace PPMTool.Helpers
                         FinancialYear = fy,
                         Values = new List<FinancialReferenceValue>
                         {
-                            new() { ValueName = FinancialReference.Grade41CostsName, Value = 34510.63f },
-                            new() { ValueName = FinancialReference.Grade51CostsName, Value = 39799.01f },
-                            new() { ValueName = FinancialReference.Grade55CostsName, Value = 44349.48f },
-                            new() { ValueName = FinancialReference.Grade65CostsName, Value = 52095f },
-                            new() { ValueName = FinancialReference.Grade71CostsName, Value = 58617.36f },
-                            new() { ValueName = FinancialReference.Grade75CostsName, Value = 65956.38f },
-                            new() { ValueName = FinancialReference.RecoveryTargetName, Value = 1118849f }
+                            new() { ValueName = "Grade41Costs", Value = 34510.63f },
+                            new() { ValueName = "Grade51Costs", Value = 39799.01f },
+                            new() { ValueName = "Grade55Costs", Value = 44349.48f },
+                            new() { ValueName = "Grade65Costs", Value = 52095f },
+                            new() { ValueName = "Grade71Costs", Value = 58617.36f },
+                            new() { ValueName = "Grade75Costs", Value = 65956.38f },
+                            new() { ValueName = "RecoveryTarget", Value = 1118849f }
                         }
                     },
                     new FinancialReference
@@ -1314,13 +1314,13 @@ namespace PPMTool.Helpers
                         FinancialYear = fy + 1,
                         Values = new List<FinancialReferenceValue>
                         {
-                            new() { ValueName = FinancialReference.Grade41CostsName, Value = 35740.07f },
-                            new() { ValueName = FinancialReference.Grade51CostsName, Value = 41010.82f },
-                            new() { ValueName = FinancialReference.Grade55CostsName, Value = 45603.10f },
-                            new() { ValueName = FinancialReference.Grade65CostsName, Value = 53422.28f },
-                            new() { ValueName = FinancialReference.Grade71CostsName, Value = 60005.48f },
-                            new() { ValueName = FinancialReference.Grade75CostsName, Value = 67585.78f },
-                            new() { ValueName = FinancialReference.RecoveryTargetName, Value = 1518718f }
+                            new() { ValueName = "Grade41Costs", Value = 35740.07f },
+                            new() { ValueName = "Grade51Costs", Value = 41010.82f },
+                            new() { ValueName = "Grade55Costs", Value = 45603.10f },
+                            new() { ValueName = "Grade65Costs", Value = 53422.28f },
+                            new() { ValueName = "Grade71Costs", Value = 60005.48f },
+                            new() { ValueName = "Grade75Costs", Value = 67585.78f },
+                            new() { ValueName = "RecoveryTarget", Value = 1518718f }
                         }
                     }
                 };

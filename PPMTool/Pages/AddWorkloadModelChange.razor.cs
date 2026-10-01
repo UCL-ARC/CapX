@@ -51,10 +51,10 @@ namespace PPMTool.Pages
                 entityToInsert.Grade = 6;
             }
 
-            // Set the default cost value name based on the grade if finance is enabled and not specified
-            if (financeEnabled && string.IsNullOrWhiteSpace(entityToInsert.CostValueName))
+            // Cost key must be explicitly selected when Project Finance is enabled
+            if (financeEnabled)
             {
-                entityToInsert.CostValueName = FinancialReference.GetDefaultCostValueNameForGrade(entityToInsert.Grade);
+                entityToInsert.CostValueName = string.Empty;
             }
 
             await dataGrid.InsertRow(entityToInsert);
@@ -93,6 +93,12 @@ namespace PPMTool.Pages
                     LogWarning($"Availability change duplicates a change date!");
                     SetErrorMessage(new StatusMessage("You cannot have multiple changes in availability on the same day!", StatusMessage.MessageType.Error));
                     return;
+                }
+
+                // Log warning if saving with missing cost keys while Project Finance is enabled, as this will use zero-cost fallback in finance calculations
+                if (financeEnabled && dataGridEntities.Any(x => string.IsNullOrWhiteSpace(x.CostValueName)))
+                {
+                    LogWarning("Saving WLM changes with one or more missing cost keys while Project Finance is enabled. Missing keys will use zero-cost fallback in finance calculations.");
                 }
 
                 ClearErrorMessage();

@@ -305,6 +305,7 @@ namespace PPMTool.Pages
                 int numberOfWeeks = 0;
                 List<string> dutyXLabels = new List<string>();
                 FinancialReference currentFinRef = FinancialReferenceService.GetFinancialReferenceForDate(Context, startDate);
+                var recoveryTargetCostValueName = GetSetting(SettingType.RecoveryTargetCostValueName);
                 float recoveryTargetPerWeek = 0f;
                 float proportionOfFY = 0f;
 
@@ -344,7 +345,7 @@ namespace PPMTool.Pages
 
                         // Compute how many weeks of this FY run within the window of the graph
                         proportionOfFY = FinancialReference.GetProportionOfFinancialYearInRange(currentFY, startDate, endDate);
-                        recoveryTargetPerWeek = currentFinRef.GetRecoveryTarget() * proportionOfFY / 52;
+                        recoveryTargetPerWeek = currentFinRef.GetValue(recoveryTargetCostValueName, Logger) * proportionOfFY / 52;
                     }
 
                     // Get the projects that are running at the start of the week (exclude those projects with no tasks as they will have "default" start date)

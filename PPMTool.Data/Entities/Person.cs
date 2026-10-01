@@ -127,6 +127,15 @@ namespace PPMTool.Data.Entities
         }
 
         /// <summary>
+        /// Checks whether this person has any workload model changes without an explicit cost key.
+        /// </summary>
+        /// <returns></returns>
+        public bool HasWorkloadModelsWithoutCostKey()
+        {
+            return WorkloadModelChanges?.Any(x => string.IsNullOrWhiteSpace(x.CostValueName)) ?? false;
+        }
+
+        /// <summary>
         /// Updates the initials of the person.
         /// </summary>
         /// <param name="name">Full name</param>

@@ -70,7 +70,7 @@ namespace PPMTool.Data.Helpers
                 .Where(x => x.ChangeDate >= startDate && x.ChangeDate <= endDate)
                 .OrderByDescending(x => x.ChangeDate).ToList();
 
-            // Get WLM in force on the first day of the window or set to default G6
+            // Get WLM in force on the first day of the window
             WorkloadModelChange defaultWLM = person.GetWorkloadModelOnDateOrDefault(startDate ?? default);
 
             // If there isn't a WLM change on the first day of the window then add the default to the list to complete it
@@ -80,8 +80,10 @@ namespace PPMTool.Data.Helpers
                 wlms.Add(defaultWLM);
             }
 
-            // Are there any changes in grade for this person?
-            var changesInGrade = wlms.DistinctBy(x => x.Grade).Count() > 1;
+            // Are there any changes in grade or selected cost key for this person?
+            var changesInGradeOrCostKey = wlms
+                .DistinctBy(x => $"{x.Grade}|{x.CostValueName?.Trim()?.ToLowerInvariant()}")
+                .Count() > 1;
 
             // Are there any changes in financial year in the window?
             var startFY = FinancialReference.GetFinancialYear(startDate ?? default);
@@ -129,6 +131,7 @@ namespace PPMTool.Data.Helpers
                 {
                     EmployeeName = person.Name,
                     Grade = defaultWLM.Grade,
+                    CostValueName = defaultWLM.CostValueName,
                     FTE = resource.AssignmentFTE,
                     BilledFTE = resource.BilledFTE,
                     ProjectId = project.RTP,
@@ -156,7 +159,7 @@ namespace PPMTool.Data.Helpers
 
                 // Are there any changes to grade for this person
                 // Ignore grade changes for leadership task resources
-                if (changesInGrade && task.SubTaskId > 0)
+                if (changesInGradeOrCostKey && task.SubTaskId > 0)
                 {
                     var tempChunks = new List<AssignmentChunk>();
 
@@ -170,7 +173,7 @@ namespace PPMTool.Data.Helpers
                         var wlmBefore = person.GetWorkloadModelOnDateOrDefault(change.ChangeDate.AddDays(-1));
 
                         // Define a new task chunk for before period if necessary
-                        if (wlmBefore.Grade != change.Grade)
+                        if (wlmBefore.Grade != change.Grade || wlmBefore.CostValueName?.Clean() != change.CostValueName?.Clean())
                         {
                             var startDateOfNewChunk = tempChunks.Count > 0 ?
                                 new DateTime(tempChunks.Last().EndDate.AddDays(1).Ticks) :
@@ -191,6 +194,8 @@ namespace PPMTool.Data.Helpers
                             // Add chunk
                             tempChunks.Add(new AssignmentChunk(initialChunk)
                             {
+                                Grade = wlmBefore.Grade,
+                                CostValueName = wlmBefore.CostValueName,
                                 StartDate = startDateOfNewChunk,
                                 EndDate = endDateOfNewChunk,
                                 PlannedCost = initialChunk.PlannedCost * proportionOfInitialChunk,
@@ -213,8 +218,11 @@ namespace PPMTool.Data.Helpers
                         budgetLine?.GetBudgetDetailsForWindow(finalChunkStart, finalChunkEnd, out budgetStatus, out amountCovered);
 
                         // Add chunk
+                        var wlmOnFinalChunkStart = person.GetWorkloadModelOnDateOrDefault(finalChunkStart);
                         tempChunks.Add(new AssignmentChunk(initialChunk)
                         {
+                            Grade = wlmOnFinalChunkStart.Grade,
+                            CostValueName = wlmOnFinalChunkStart.CostValueName,
                             StartDate = finalChunkStart,
                             EndDate = finalChunkEnd,
                             PlannedCost = remainingCosts > 0 ? remainingCosts : 0,

@@ -181,8 +181,16 @@ SPDX-License-Identifier: apache-2.0
             );
         }
 
-        // Set suitable default cost value name
-        Model.CostValueName = Model.IsLeadership ? FinancialReference.Grade75CostsName : FinancialReference.Grade71CostsName;
+        // Set suitable default cost value name from settings, then fallback to first available option
+        if (string.IsNullOrWhiteSpace(Model.CostValueName))
+        {
+            Model.CostValueName = SettingsService.GetSetting(SettingType.EstimateCostDefaultCostValueName);
+        }
+
+        if (string.IsNullOrWhiteSpace(Model.CostValueName))
+        {
+            Model.CostValueName = GetCostValueOptions(Model.StartDate).FirstOrDefault() ?? string.Empty;
+        }
 
         ValueChanged(nameof(Model.StartDate));
     }
@@ -221,7 +229,7 @@ SPDX-License-Identifier: apache-2.0
     public class TaskConfigModel : BaseScheduledTask
     {
         public double DayRate { get; set; }
-        public string CostValueName { get; set; } = FinancialReference.Grade71CostsName;
+        public string CostValueName { get; set; } = string.Empty;
         public CostModel CostModel { get; private set; }
         public bool IsLeadership { get; }
 
@@ -362,9 +370,7 @@ SPDX-License-Identifier: apache-2.0
                     double techCost = 0d;
                     double indirectCost = 0d;
 
-                    // Use selected value name for annual salary lookup
-                    var costValueName = string.IsNullOrWhiteSpace(CostValueName) ? FinancialReference.Grade71CostsName : CostValueName;
-                    double resourceRate = finRef.GetValue(costValueName);
+                    double resourceRate = finRef.GetValue(CostValueName);
 
                     // Calculate the costs
                     techCost = resourceRate * dayScaled;

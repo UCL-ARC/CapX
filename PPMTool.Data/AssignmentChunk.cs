@@ -19,6 +19,9 @@ namespace PPMTool.Data
         [Description("The grade of the person for the duration of this assignment")]
         public int Grade { get; set; }
 
+        [Description("Financial reference value key used to compute costs for this assignment chunk")]
+        public string? CostValueName { get; set; }
+
         /// <summary>
         /// This is the FTE of the resource for this assignment chunk based on the project work duty allocation
         /// </summary>
@@ -108,6 +111,7 @@ namespace PPMTool.Data
         {
             EmployeeName = taskToCopy.EmployeeName;
             Grade = taskToCopy.Grade;
+            CostValueName = taskToCopy.CostValueName;
             FTE = taskToCopy.FTE;
             BilledFTE = taskToCopy.BilledFTE;
             ProjectId = taskToCopy.ProjectId;
@@ -132,7 +136,7 @@ namespace PPMTool.Data
         }
 
         /// <summary>
-        /// Based on available financial references, recompute the estimated salary cost of the assignment based on the mid-grade costs of the assignee
+        /// Based on available financial references, recompute the estimated salary cost of the assignment using the explicitly selected cost key.
         /// </summary>
         /// <param name="finrefs"></param>
         /// <param name="shouldUpdatePlanned"></param>
@@ -140,7 +144,7 @@ namespace PPMTool.Data
         {
             try
             {
-                var annualCosts = finrefs.GetSuitableFinancialReference(FinancialYear).GetMidGradeCosts(Grade);
+                var annualCosts = finrefs.GetSuitableFinancialReference(FinancialYear).GetValue(CostValueName);
                 var fractionOfYear = (EndDate.Date.Subtract(StartDate.Date).TotalDays + 1) / 365d;
 
                 // The cost of a resource uses the BilledFTE which means it includes indirects if the model permits it

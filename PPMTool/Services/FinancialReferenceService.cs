@@ -114,14 +114,12 @@ namespace PPMTool.Services
         }
 
         /// <summary>
-        /// Gets the available cost value names from the suitable financial reference set for the provided date.
-        /// Excludes recovery target by default.
+        /// Gets available cost value names from the suitable financial reference set for the provided date.
         /// </summary>
         /// <param name="context"></param>
         /// <param name="date"></param>
-        /// <param name="includeRecoveryTarget"></param>
         /// <returns></returns>
-        public IEnumerable<string> GetCostValueOptionsForDate(PPMToolContext context, DateTime date, bool includeRecoveryTarget = false)
+        public IEnumerable<string> GetCostValueOptionsForDate(PPMToolContext context, DateTime date)
         {
             if (context == null || !context.FinancialReferences.Any())
             {
@@ -129,31 +127,27 @@ namespace PPMTool.Services
             }
 
             var finRef = GetFinancialReferenceForDate(context, date);
-            return GetCostValueOptions(finRef, includeRecoveryTarget);
+            return GetCostValueOptions(finRef);
         }
 
         /// <summary>
-        /// Gets the available cost value names from the provided financial reference set.
-        /// Excludes recovery target by default.
+        /// Gets available cost value names from the provided financial reference set.
         /// </summary>
         /// <param name="finRef"></param>
-        /// <param name="includeRecoveryTarget"></param>
         /// <returns></returns>
-        public IEnumerable<string> GetCostValueOptions(FinancialReference finRef, bool includeRecoveryTarget = false)
+        public IEnumerable<string> GetCostValueOptions(FinancialReference finRef)
         {
+            // No values in the financial reference set
             if (finRef?.Values == null)
             {
                 return Enumerable.Empty<string>();
             }
 
+            // Subset of valid values
             var values = finRef.Values
                 .Where(x => !string.IsNullOrWhiteSpace(x.ValueName));
 
-            if (!includeRecoveryTarget)
-            {
-                values = values.Where(x => !x.ValueName.Equals(FinancialReference.RecoveryTargetName, StringComparison.OrdinalIgnoreCase));
-            }
-
+            // Returns distinct values ordered by name
             return values
                 .Select(x => x.ValueName.Trim())
                 .Distinct(StringComparer.OrdinalIgnoreCase)

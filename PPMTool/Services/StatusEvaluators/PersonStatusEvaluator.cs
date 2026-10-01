@@ -4,6 +4,7 @@
 
 using PPMTool.Data;
 using PPMTool.Data.Entities;
+using PPMTool.Data.Enums;
 
 namespace PPMTool.Services.StatusEvaluators
 {
@@ -16,7 +17,12 @@ namespace PPMTool.Services.StatusEvaluators
         {
             return new List<StatusMessage>
             {
-                new StatusMessage("This person is currently absent.", StatusMessage.MessageType.Info, person.IsCurrentlyAbsent)
+                new StatusMessage("This person is currently absent.", StatusMessage.MessageType.Info, person.IsCurrentlyAbsent),
+                new StatusMessage(
+                    "Project Finance is enabled and this person has one or more workload model changes without a cost key. Missing cost keys fall back to zero cost.",
+                    StatusMessage.MessageType.Warning,
+                    () => person.HasWorkloadModelsWithoutCostKey(),
+                    FeatureType.ProjectFinance)
             };
         }
     }

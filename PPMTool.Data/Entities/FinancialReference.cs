@@ -9,14 +9,6 @@ namespace PPMTool.Data.Entities
 {
     public class FinancialReference : ILoggableObject
     {
-        public const string Grade41CostsName = "Grade41Costs";
-        public const string Grade51CostsName = "Grade51Costs";
-        public const string Grade55CostsName = "Grade55Costs";
-        public const string Grade65CostsName = "Grade65Costs";
-        public const string Grade71CostsName = "Grade71Costs";
-        public const string Grade75CostsName = "Grade75Costs";
-        public const string RecoveryTargetName = "RecoveryTarget";
-
         public int FinancialReferenceId { get; set; }
 
         /// <summary>
@@ -107,7 +99,7 @@ namespace PPMTool.Data.Entities
         /// <param name="valueName"></param>
         /// <param name="logger"></param>
         /// <returns></returns>
-        public float GetValue(string valueName, ILogger? logger = null)
+        public float GetValue(string? valueName, ILogger? logger = null)
         {
             if (string.IsNullOrWhiteSpace(valueName))
             {
@@ -135,39 +127,7 @@ namespace PPMTool.Data.Entities
         }
 
         /// <summary>
-        /// Gets the recovery target value from the financial reference set.
-        /// </summary>
-        /// <returns></returns>
-        public float GetRecoveryTarget()
-        {
-            return GetValue(RecoveryTargetName);
-        }
-
-        /// <summary>
-        /// Gets the default cost value name for a given grade, based on predefined mappings.
-        /// </summary>
-        /// <param name="grade"></param>
-        /// <returns></returns>
-        public static string GetDefaultCostValueNameForGrade(int grade)
-        {
-            if (grade <= 4)
-            {
-                return Grade41CostsName;
-            }
-            else if (grade == 5)
-            {
-                return Grade55CostsName;
-            }
-            else if (grade == 6)
-            {
-                return Grade65CostsName;
-            }
-
-            return Grade75CostsName;
-        }
-
-        /// <summary>
-        /// Gets the annual cost for a given workload model, using the cost value name specified in the workload model or a default based on the grade if not specified.
+        /// Gets the annual cost for a given workload model using its explicitly selected cost value name.
         /// </summary>
         /// <param name="workloadModel"></param>
         /// <param name="logger"></param>
@@ -180,36 +140,13 @@ namespace PPMTool.Data.Entities
                 return 0;
             }
 
-            var valueName = string.IsNullOrWhiteSpace(workloadModel.CostValueName)
-                ? GetDefaultCostValueNameForGrade(workloadModel.Grade)
-                : workloadModel.CostValueName;
+            if (string.IsNullOrWhiteSpace(workloadModel.CostValueName))
+            {
+                logger?.LogWarning("FinancialReference [{FinancialReferenceId}] - {FinancialYear}: workload model {WorkloadModelChangeId} has no cost key selected. Returning 0.", FinancialReferenceId, FinancialYear, workloadModel.WorkloadModelChangeId);
+                return 0;
+            }
 
-            return GetValue(valueName, logger);
-        }
-
-        /// <summary>
-        /// Returns the mid grade salary costs from the reference.
-        /// Grade 4 always bottom of grade.
-        /// Less than Grade4 returns G4.1.
-        /// Greater than Grade 7 returns G7.1.
-        /// </summary>
-        /// <param name="grade"></param>
-        /// <returns></returns>
-        public double GetMidGradeCosts(int grade)
-        {
-            if (grade <= 4)
-            {
-                return GetValue(Grade41CostsName);
-            }
-            else if (grade == 5)
-            {
-                return GetValue(Grade55CostsName);
-            }
-            else if (grade == 6)
-            {
-                return GetValue(Grade65CostsName);
-            }
-            return GetValue(Grade75CostsName);
+            return GetValue(workloadModel.CostValueName, logger);
         }
     }
 }

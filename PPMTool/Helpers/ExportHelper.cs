@@ -381,8 +381,8 @@ namespace PPMTool.Helpers
                         var gradeOnDay = wlm?.Grade ?? null;
                         var wlmTotal = wlm?.Total() ?? 0;
 
-                        // Get day costs for person based on selected cost key (or grade fallback)
-                        var annualCosts = wlm == null ? 0 : finref.GetAnnualCostForWorkloadModel(wlm);
+                        // Get day costs for person based on selected cost key
+                        var annualCosts = wlm == null ? 0 : finref.GetAnnualCostForWorkloadModel(wlm, logger);
                         var actualCostsOnDay = annualCosts / 365.0;
                         var referenceCostsForADay = actualCostsOnDay;
 
