@@ -8,7 +8,6 @@ using PPMTool.Data;
 using PPMTool.Data.Entities;
 using PPMTool.Data.Enums;
 using PPMTool.Services;
-using static PPMTool.Data.Extensions;
 
 namespace PPMTool.Pages
 {
@@ -70,9 +69,7 @@ namespace PPMTool.Pages
         }
 
         /// <summary>
-        /// Gets the available cost value options for a given change date from the financial reference set associated with the change date.
-        /// If finance is not enabled, returns an empty list.
-        /// If no financial reference is available for the date, logs a warning and returns an empty list.
+        /// Gets the available cost value options for a given change date from the suitable financial reference set.
         /// </summary>
         /// <param name="changeDate"></param>
         /// <returns></returns>
@@ -83,24 +80,7 @@ namespace PPMTool.Pages
                 return Enumerable.Empty<string>();
             }
 
-            try
-            {
-                // Get the financial reference for the change date and return the distinct value names, excluding the recovery target
-                var finRef = FinancialReferenceService.GetFinancialReferenceForDate(Context, changeDate);
-                return finRef.Values
-                    .Where(x => !string.IsNullOrWhiteSpace(x.ValueName)
-                                && !x.ValueName.Equals(FinancialReference.RecoveryTargetName, StringComparison.OrdinalIgnoreCase))
-                    .Select(x => x.ValueName.Trim())
-                    .Distinct(StringComparer.OrdinalIgnoreCase)
-                    .OrderBy(x => x)
-                    .ToList();
-            }
-            catch (FinancialRefException)
-            {
-                // This only happens if there is no financial reference available at all as it will map to the nearest one
-                LogWarning($"No financial reference available for {changeDate:dd/MM/yyyy} while loading WLM cost key options.");
-                return Enumerable.Empty<string>();
-            }
+            return FinancialReferenceService.GetCostValueOptionsForDate(Context, changeDate);
         }
 
         private void HandleValidSubmit()

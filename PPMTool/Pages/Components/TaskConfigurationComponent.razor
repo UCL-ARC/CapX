@@ -72,14 +72,14 @@ SPDX-License-Identifier: apache-2.0
             else
             {
                 <RadzenLabel class="radzen-form-label"
-                             Text="Resource Rate"
-                             Component="Rate" />
+                             Text="Cost Key"
+                             Component="CostValueName" />
                 <RadzenDropDown class="radzen-dropdown"
-                                @bind-Value="Model.ResourceRate"
-                                Data="@(Enum.GetValues(typeof(Rate)))"
-                                Name="Rate"
+                                @bind-Value="Model.CostValueName"
+                                Data="@GetCostValueOptions(Model.StartDate)"
+                                Name="CostValueName"
                                 Disabled="@ReadOnly"
-                                Change="@(() => ValueChanged(nameof(Model.ResourceRate)))" />
+                                Change="@(() => ValueChanged(nameof(Model.CostValueName)))" />
             }
         </div>
     }
@@ -180,7 +180,21 @@ SPDX-License-Identifier: apache-2.0
                 SettingsService.GetSetting(SettingType.BAUTopSliceFractionDefault, 0.0)
             );
         }
+
+        // Set suitable default cost value name
+        Model.CostValueName = Model.IsLeadership ? FinancialReference.Grade75CostsName : FinancialReference.Grade71CostsName;
+
         ValueChanged(nameof(Model.StartDate));
+    }
+
+    /// <summary>
+    /// Gets the available cost value options for a given date from the suitable financial reference set.
+    /// </summary>
+    /// <param name="date"></param>
+    /// <returns></returns>
+    private IEnumerable<string> GetCostValueOptions(DateTime date)
+    {
+        return FinancialReferenceService.GetCostValueOptionsForDate(Context, date);
     }
 
     /// <summary>
@@ -207,12 +221,12 @@ SPDX-License-Identifier: apache-2.0
     public class TaskConfigModel : BaseScheduledTask
     {
         public double DayRate { get; set; }
-        public Rate ResourceRate { get; set; } = Rate.Standard;
+        public string CostValueName { get; set; } = FinancialReference.Grade71CostsName;
         public CostModel CostModel { get; private set; }
+        public bool IsLeadership { get; }
 
         private FinancialReferenceService finRefService;
         private PPMToolContext context;
-        private bool isLeadership;
         private double indirectsPercentage = 0d;
 
         public TaskConfigModel(FinancialReferenceService financialReferenceService, PPMToolContext context, bool isLeadership, double defaultDayRate, double indirectsPercentage)
@@ -220,7 +234,7 @@ SPDX-License-Identifier: apache-2.0
             this.indirectsPercentage = indirectsPercentage;
             finRefService = financialReferenceService;
             this.context = context;
-            this.isLeadership = isLeadership;
+            this.IsLeadership = isLeadership;
             StartDate = DateTime.Today;
             EndDate = StartDate.AddDays(7);
             DayRate = defaultDayRate;
@@ -237,7 +251,7 @@ SPDX-License-Identifier: apache-2.0
         /// 6. Work (Hours)
         /// 7. DayRate
         /// 8. Cost Model
-        /// 9. Resource Rate
+        /// 9. Cost Value Name
         /// </summary>
         /// <param name="nameOfPropertyTrigger"></param>
         public void Update(string nameOfPropertyTrigger)
@@ -289,7 +303,7 @@ SPDX-License-Identifier: apache-2.0
 
                 case nameof(DayRate):
                 case nameof(CostModel):
-                case nameof(ResourceRate):
+                case nameof(CostValueName):
 
                     // Update the cost only
                     UpdateCost();
@@ -348,12 +362,13 @@ SPDX-License-Identifier: apache-2.0
                     double techCost = 0d;
                     double indirectCost = 0d;
 
-                    // Use reference helper to select the configured rate value
-                    double resourceRate = finRef.GetJuniorOrStandardAnnualCosts(ResourceRate);
+                    // Use selected value name for annual salary lookup
+                    var costValueName = string.IsNullOrWhiteSpace(CostValueName) ? FinancialReference.Grade71CostsName : CostValueName;
+                    double resourceRate = finRef.GetValue(costValueName);
 
                     // Calculate the costs
                     techCost = resourceRate * dayScaled;
-                    indirectCost = (CostModel.HasIndirects() && !isLeadership) ? techCost * indirectsPercentage : 0;
+                    indirectCost = (CostModel.HasIndirects() && !IsLeadership) ? techCost * indirectsPercentage : 0;
                     PlannedIndirectCost += indirectCost;
                     PlannedCost += techCost + indirectCost;
                 }

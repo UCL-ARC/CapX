@@ -114,6 +114,54 @@ namespace PPMTool.Services
         }
 
         /// <summary>
+        /// Gets the available cost value names from the suitable financial reference set for the provided date.
+        /// Excludes recovery target by default.
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="date"></param>
+        /// <param name="includeRecoveryTarget"></param>
+        /// <returns></returns>
+        public IEnumerable<string> GetCostValueOptionsForDate(PPMToolContext context, DateTime date, bool includeRecoveryTarget = false)
+        {
+            if (context == null || !context.FinancialReferences.Any())
+            {
+                return Enumerable.Empty<string>();
+            }
+
+            var finRef = GetFinancialReferenceForDate(context, date);
+            return GetCostValueOptions(finRef, includeRecoveryTarget);
+        }
+
+        /// <summary>
+        /// Gets the available cost value names from the provided financial reference set.
+        /// Excludes recovery target by default.
+        /// </summary>
+        /// <param name="finRef"></param>
+        /// <param name="includeRecoveryTarget"></param>
+        /// <returns></returns>
+        public IEnumerable<string> GetCostValueOptions(FinancialReference finRef, bool includeRecoveryTarget = false)
+        {
+            if (finRef?.Values == null)
+            {
+                return Enumerable.Empty<string>();
+            }
+
+            var values = finRef.Values
+                .Where(x => !string.IsNullOrWhiteSpace(x.ValueName));
+
+            if (!includeRecoveryTarget)
+            {
+                values = values.Where(x => !x.ValueName.Equals(FinancialReference.RecoveryTargetName, StringComparison.OrdinalIgnoreCase));
+            }
+
+            return values
+                .Select(x => x.ValueName.Trim())
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .OrderBy(x => x)
+                .ToList();
+        }
+
+        /// <summary>
         /// Method to return a suitable financial reference following set logic given a date in a certain financial year
         /// </summary>
         /// <param name="context"></param>

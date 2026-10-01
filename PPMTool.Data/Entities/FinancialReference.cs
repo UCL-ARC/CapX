@@ -3,7 +3,6 @@
 // SPDX-License-Identifier: apache-2.0
 
 using Microsoft.Extensions.Logging;
-using PPMTool.Data.Enums;
 using PPMTool.Data.Interfaces;
 
 namespace PPMTool.Data.Entities
@@ -186,32 +185,6 @@ namespace PPMTool.Data.Entities
                 : workloadModel.CostValueName;
 
             return GetValue(valueName, logger);
-        }
-
-        /// <summary>
-        /// Gets a suitable standard or junior figure from the financial references for annual costs
-        /// </summary>
-        /// <param name="rate"></param>
-        /// <returns></returns>
-        public double GetJuniorOrStandardAnnualCosts(Rate rate)
-        {
-            // Junior Rate
-            if (rate == Rate.Junior)
-            {
-                return GetValue(Grade51CostsName);
-            }
-
-            // Standard Rate
-            else if (rate == Rate.Standard)
-            {
-                return GetValue(Grade71CostsName);
-            }
-
-            // Senior rate
-            else
-            {
-                return GetValue(Grade75CostsName);
-            }
         }
 
         /// <summary>
