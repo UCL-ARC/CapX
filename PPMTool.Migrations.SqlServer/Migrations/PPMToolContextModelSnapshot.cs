@@ -234,6 +234,27 @@ namespace PPMTool.Migrations.SqlServer.Migrations
                     b.Property<int>("FinancialYear")
                         .HasColumnType("int");
 
+                    b.Property<float>("Grade41Costs")
+                        .HasColumnType("real");
+
+                    b.Property<float>("Grade51Costs")
+                        .HasColumnType("real");
+
+                    b.Property<float>("Grade55Costs")
+                        .HasColumnType("real");
+
+                    b.Property<float>("Grade65Costs")
+                        .HasColumnType("real");
+
+                    b.Property<float>("Grade71Costs")
+                        .HasColumnType("real");
+
+                    b.Property<float>("Grade75Costs")
+                        .HasColumnType("real");
+
+                    b.Property<float>("RecoveryTarget")
+                        .HasColumnType("real");
+
                     b.HasKey("FinancialReferenceId");
 
                     b.ToTable("FinancialReferences");

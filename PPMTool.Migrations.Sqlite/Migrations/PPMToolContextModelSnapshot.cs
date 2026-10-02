@@ -215,6 +215,27 @@ namespace PPMTool.Migrations.Sqlite.Migrations
                     b.Property<int>("FinancialYear")
                         .HasColumnType("INTEGER");
 
+                    b.Property<float>("Grade41Costs")
+                        .HasColumnType("REAL");
+
+                    b.Property<float>("Grade51Costs")
+                        .HasColumnType("REAL");
+
+                    b.Property<float>("Grade55Costs")
+                        .HasColumnType("REAL");
+
+                    b.Property<float>("Grade65Costs")
+                        .HasColumnType("REAL");
+
+                    b.Property<float>("Grade71Costs")
+                        .HasColumnType("REAL");
+
+                    b.Property<float>("Grade75Costs")
+                        .HasColumnType("REAL");
+
+                    b.Property<float>("RecoveryTarget")
+                        .HasColumnType("REAL");
+
                     b.HasKey("FinancialReferenceId");
 
                     b.ToTable("FinancialReferences");
