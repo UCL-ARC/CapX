@@ -229,37 +229,18 @@ namespace PPMTool.Migrations.Sqlite.Migrations
                     b.Property<int>("FinancialReferenceId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("FinancialReferenceValueSetId")
-                        .HasColumnType("INTEGER");
-
                     b.Property<float>("Value")
                         .HasColumnType("REAL");
+
+                    b.Property<string>("ValueName")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
 
                     b.HasKey("FinancialReferenceValueId");
 
                     b.HasIndex("FinancialReferenceId");
 
-                    b.HasIndex("FinancialReferenceValueSetId");
-
                     b.ToTable("FinancialReferenceValues");
-                });
-
-            modelBuilder.Entity("PPMTool.Data.Entities.FinancialReferenceValueSet", b =>
-                {
-                    b.Property<int>("FinancialReferenceValueSetId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Description")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("FinancialReferenceValueSetId");
-
-                    b.ToTable("FinancialReferenceValueSets");
                 });
 
             modelBuilder.Entity("PPMTool.Data.Entities.FundingSource", b =>
@@ -975,8 +956,8 @@ namespace PPMTool.Migrations.Sqlite.Migrations
                     b.Property<DateTime>("ChangeDate")
                         .HasColumnType("TEXT");
 
-                    b.Property<int?>("CostValueSetId")
-                        .HasColumnType("INTEGER");
+                    b.Property<string>("CostValueName")
+                        .HasColumnType("TEXT");
 
                     b.Property<int>("Grade")
                         .HasColumnType("INTEGER");
@@ -1006,8 +987,6 @@ namespace PPMTool.Migrations.Sqlite.Migrations
                         .HasColumnType("REAL");
 
                     b.HasKey("WorkloadModelChangeId");
-
-                    b.HasIndex("CostValueSetId");
 
                     b.HasIndex("PersonId");
 
@@ -1089,15 +1068,7 @@ namespace PPMTool.Migrations.Sqlite.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("PPMTool.Data.Entities.FinancialReferenceValueSet", "FinancialReferenceValueSet")
-                        .WithMany()
-                        .HasForeignKey("FinancialReferenceValueSetId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.Navigation("FinancialReference");
-
-                    b.Navigation("FinancialReferenceValueSet");
                 });
 
             modelBuilder.Entity("PPMTool.Data.Entities.FundingSource", b =>
@@ -1342,18 +1313,11 @@ namespace PPMTool.Migrations.Sqlite.Migrations
 
             modelBuilder.Entity("PPMTool.Data.Entities.WorkloadModelChange", b =>
                 {
-                    b.HasOne("PPMTool.Data.Entities.FinancialReferenceValueSet", "CostValueSet")
-                        .WithMany()
-                        .HasForeignKey("CostValueSetId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
                     b.HasOne("PPMTool.Data.Entities.Person", "Person")
                         .WithMany("WorkloadModelChanges")
                         .HasForeignKey("PersonId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("CostValueSet");
 
                     b.Navigation("Person");
                 });

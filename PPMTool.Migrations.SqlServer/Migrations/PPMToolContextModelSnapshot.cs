@@ -250,39 +250,18 @@ namespace PPMTool.Migrations.SqlServer.Migrations
                     b.Property<int>("FinancialReferenceId")
                         .HasColumnType("int");
 
-                    b.Property<int>("FinancialReferenceValueSetId")
-                        .HasColumnType("int");
-
                     b.Property<float>("Value")
                         .HasColumnType("real");
+
+                    b.Property<string>("ValueName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("FinancialReferenceValueId");
 
                     b.HasIndex("FinancialReferenceId");
 
-                    b.HasIndex("FinancialReferenceValueSetId");
-
                     b.ToTable("FinancialReferenceValues");
-                });
-
-            modelBuilder.Entity("PPMTool.Data.Entities.FinancialReferenceValueSet", b =>
-                {
-                    b.Property<int>("FinancialReferenceValueSetId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("FinancialReferenceValueSetId"));
-
-                    b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("FinancialReferenceValueSetId");
-
-                    b.ToTable("FinancialReferenceValueSets");
                 });
 
             modelBuilder.Entity("PPMTool.Data.Entities.FundingSource", b =>
@@ -1034,8 +1013,8 @@ namespace PPMTool.Migrations.SqlServer.Migrations
                     b.Property<DateTime>("ChangeDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<int?>("CostValueSetId")
-                        .HasColumnType("int");
+                    b.Property<string>("CostValueName")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("Grade")
                         .HasColumnType("int");
@@ -1065,8 +1044,6 @@ namespace PPMTool.Migrations.SqlServer.Migrations
                         .HasColumnType("float");
 
                     b.HasKey("WorkloadModelChangeId");
-
-                    b.HasIndex("CostValueSetId");
 
                     b.HasIndex("PersonId");
 
@@ -1148,15 +1125,7 @@ namespace PPMTool.Migrations.SqlServer.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("PPMTool.Data.Entities.FinancialReferenceValueSet", "FinancialReferenceValueSet")
-                        .WithMany()
-                        .HasForeignKey("FinancialReferenceValueSetId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.Navigation("FinancialReference");
-
-                    b.Navigation("FinancialReferenceValueSet");
                 });
 
             modelBuilder.Entity("PPMTool.Data.Entities.FundingSource", b =>
@@ -1401,18 +1370,11 @@ namespace PPMTool.Migrations.SqlServer.Migrations
 
             modelBuilder.Entity("PPMTool.Data.Entities.WorkloadModelChange", b =>
                 {
-                    b.HasOne("PPMTool.Data.Entities.FinancialReferenceValueSet", "CostValueSet")
-                        .WithMany()
-                        .HasForeignKey("CostValueSetId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
                     b.HasOne("PPMTool.Data.Entities.Person", "Person")
                         .WithMany("WorkloadModelChanges")
                         .HasForeignKey("PersonId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("CostValueSet");
 
                     b.Navigation("Person");
                 });
