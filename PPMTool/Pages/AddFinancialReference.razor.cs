@@ -24,10 +24,12 @@ namespace PPMTool.Pages
         private FinancialReferenceService FinancialReferenceService { get; set; }
 
         private FinancialReference financialReference;
+        private List<FinancialReferenceValueSet> financialReferenceValueSets = new();
 
         protected override async Task OnInitializedAsync()
         {
             await base.OnInitializedAsync();
+            financialReferenceValueSets = FinancialReferenceService.GetAllValueSets(Context).ToList();
 
             if (FinancialReferenceId > 0)
             {
@@ -39,7 +41,7 @@ namespace PPMTool.Pages
                 {
                     FinancialReferenceValueId = x.FinancialReferenceValueId,
                     FinancialReferenceValueSetId = x.FinancialReferenceValueSetId,
-                    FinancialReferenceValueSet = x.FinancialReferenceValueSet ?? new FinancialReferenceValueSet { Name = string.Empty },
+                    FinancialReferenceValueSet = financialReferenceValueSets.FirstOrDefault(y => y.FinancialReferenceValueSetId == x.FinancialReferenceValueSetId) ?? x.FinancialReferenceValueSet,
                     Value = x.Value,
                     FinancialReferenceId = x.FinancialReferenceId,
                     FinancialReference = x.FinancialReference
@@ -59,11 +61,8 @@ namespace PPMTool.Pages
                     Values = (sourceReference?.Values ?? Enumerable.Empty<FinancialReferenceValue>())
                         .Select(x => new FinancialReferenceValue
                         {
-                            FinancialReferenceValueSet = new FinancialReferenceValueSet
-                            {
-                                Name = x.FinancialReferenceValueSet?.Name ?? string.Empty,
-                                Description = x.FinancialReferenceValueSet?.Description
-                            },
+                            FinancialReferenceValueSetId = x.FinancialReferenceValueSetId,
+                            FinancialReferenceValueSet = financialReferenceValueSets.FirstOrDefault(y => y.FinancialReferenceValueSetId == x.FinancialReferenceValueSetId),
                             Value = x.Value
                         })
                         .ToList()
@@ -77,6 +76,7 @@ namespace PPMTool.Pages
                 dataGridEntities = new List<FinancialReferenceValue>();
             }
 
+            RefreshValueSetLinks();
             SetDefaultActionBar(HandleValidSubmit, DiscardChanges);
             LogInformation($"Adding / Editing financial reference set {financialReference?.GetSensibleObjectName()}");
         }
@@ -104,19 +104,18 @@ namespace PPMTool.Pages
             ClearErrorMessage();
             financialReference.Values.Clear();
 
-            // Trim whitespace from key names and associate each value with the financial reference set
+            // Associate each value with the financial reference set
             foreach (var value in dataGridEntities)
             {
-                value.FinancialReferenceValueSet ??= new FinancialReferenceValueSet();
-                value.FinancialReferenceValueSet.Name = value.FinancialReferenceValueSet.Name?.Trim() ?? string.Empty;
                 value.FinancialReference = financialReference;
+                value.FinancialReferenceValueSet = financialReferenceValueSets.FirstOrDefault(x => x.FinancialReferenceValueSetId == value.FinancialReferenceValueSetId);
                 financialReference.Values.Add(value);
             }
 
-            // Validate that all values have a key name
-            if (financialReference.Values.Any(x => string.IsNullOrWhiteSpace(x.FinancialReferenceValueSet?.Name)))
+            // Validate that all values have a value-set association
+            if (financialReference.Values.Any(x => x.FinancialReferenceValueSetId <= 0 || x.FinancialReferenceValueSet == null))
             {
-                SetErrorMessage(new StatusMessage("All values must have a name.", StatusMessage.MessageType.Error));
+                SetErrorMessage(new StatusMessage("All values must be associated with a value set.", StatusMessage.MessageType.Error));
                 return;
             }
 
@@ -131,10 +130,17 @@ namespace PPMTool.Pages
                 result = FinancialReferenceService.Add(Context, financialReference);
             }
 
-            // If the result is -1, it indicates a validation failure due to duplicate financial year or duplicate value names within the set
+            // If the result is -1, it indicates a validation failure due to duplicate financial year or duplicate value sets within the set
             if (result == -1)
             {
-                SetErrorMessage(new StatusMessage("Financial year must be unique and value names cannot duplicate in a set.", StatusMessage.MessageType.Error));
+                SetErrorMessage(new StatusMessage("Financial year must be unique and value sets cannot duplicate in a set.", StatusMessage.MessageType.Error));
+                return;
+            }
+
+            // If the result is -2, it indicates that one or more selected value sets were invalid
+            if (result == -2)
+            {
+                SetErrorMessage(new StatusMessage("One or more selected value sets are invalid.", StatusMessage.MessageType.Error));
                 return;
             }
 
@@ -150,6 +156,37 @@ namespace PPMTool.Pages
         }
 
         /// <summary>
+        /// Gets the available financial reference value sets for a given row, excluding those that are already selected in other rows.
+        /// This ensures that each value set can only be associated with one value in the current financial reference set.
+        /// </summary>
+        /// <param name="row"></param>
+        /// <returns></returns>
+        private IEnumerable<FinancialReferenceValueSet> GetAvailableValueSetsForRow(FinancialReferenceValue row)
+        {
+            var selectedIds = dataGridEntities
+                .Where(x => !ReferenceEquals(x, row) && x.FinancialReferenceValueSetId > 0)
+                .Select(x => x.FinancialReferenceValueSetId)
+                .ToHashSet();
+
+            return financialReferenceValueSets
+                .Where(x => !selectedIds.Contains(x.FinancialReferenceValueSetId) || x.FinancialReferenceValueSetId == row.FinancialReferenceValueSetId)
+                .OrderBy(x => x.Name)
+                .ToList();
+        }
+
+        /// <summary>
+        /// Refreshes the links between financial reference values and their corresponding value sets.
+        /// This method ensures that each financial reference value in the data grid has its FinancialReferenceValueSet property correctly set based on the current list of available value sets.
+        /// </summary>
+        private void RefreshValueSetLinks()
+        {
+            foreach (var value in dataGridEntities)
+            {
+                value.FinancialReferenceValueSet = financialReferenceValueSets.FirstOrDefault(x => x.FinancialReferenceValueSetId == value.FinancialReferenceValueSetId);
+            }
+        }
+
+        /// <summary>
         /// Cancels the edit operation for a given financial reference value. Restores the original state of the entity and cancels the edit row in the data grid.
         /// </summary>
         /// <param name="entity"></param>
@@ -159,6 +196,33 @@ namespace PPMTool.Pages
             Reset();
             FinancialReferenceService.RestoreModel(Context, ref entity);
             dataGrid.CancelEditRow(entity);
+            RefreshValueSetLinks();
+        }
+
+        /// <summary>
+        /// Inserts a new row into the data grid for adding a financial reference value.
+        /// It selects the first available financial reference value set that is not already associated with an existing value in the current financial reference set and assigns it to the new entity being inserted.
+        /// </summary>
+        /// <returns></returns>
+        protected override async Task InsertRow()
+        {
+            await base.InsertRow();
+
+            var selectedIds = dataGridEntities
+                .Where(x => x.FinancialReferenceValueSetId > 0)
+                .Select(x => x.FinancialReferenceValueSetId)
+                .ToHashSet();
+
+            var firstAvailable = financialReferenceValueSets
+                .FirstOrDefault(x => !selectedIds.Contains(x.FinancialReferenceValueSetId));
+
+            if (firstAvailable != null)
+            {
+                entityToInsert.FinancialReferenceValueSetId = firstAvailable.FinancialReferenceValueSetId;
+                entityToInsert.FinancialReferenceValueSet = firstAvailable;
+            }
+
+            await dataGrid.EditRow(entityToInsert);
         }
 
         /// <summary>
@@ -168,6 +232,7 @@ namespace PPMTool.Pages
         protected override void OnCreateRow(FinancialReferenceValue entity)
         {
             entity.FinancialReference = financialReference;
+            entity.FinancialReferenceValueSet = financialReferenceValueSets.FirstOrDefault(x => x.FinancialReferenceValueSetId == entity.FinancialReferenceValueSetId);
             dataGridEntities.Add(entity);
             entityToInsert = null;
         }
@@ -179,7 +244,9 @@ namespace PPMTool.Pages
         protected override void OnUpdateRow(FinancialReferenceValue entity)
         {
             entity.FinancialReference = financialReference;
+            entity.FinancialReferenceValueSet = financialReferenceValueSets.FirstOrDefault(x => x.FinancialReferenceValueSetId == entity.FinancialReferenceValueSetId);
             Reset();
+            RefreshValueSetLinks();
         }
     }
 }

@@ -43,6 +43,14 @@ namespace PPMTool.Pages
         }
 
         /// <summary>
+        /// Navigates to the page for managing value sets.
+        /// </summary>
+        private void ManageValueSets()
+        {
+            Navigation.NavigateTo("managefinref/valuesets");
+        }
+
+        /// <summary>
         /// Navigates to the edit page for a financial reference.
         /// </summary>
         /// <param name="entity"></param>

@@ -56,12 +56,18 @@ SPDX-License-Identifier: apache-2.0
                                 RowCreate="@OnCreateRow"
                                 FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive">
                     <Columns>
-                        <RadzenDataGridColumn TItem="FinancialReferenceValue" Property="FinancialReferenceValueSet.Name" Title="Name" Width="18rem" MinWidth="10px">
+                        <RadzenDataGridColumn TItem="FinancialReferenceValue" Property="FinancialReferenceValueSetId" Title="Value Set" Width="18rem" MinWidth="10px">
                             <Template Context="item">
                                 @item.FinancialReferenceValueSet?.Name
                             </Template>
                             <EditTemplate Context="item">
-                                <RadzenTextBox class="no-margin" @bind-Value="item.FinancialReferenceValueSet.Name" />
+                                <RadzenDropDown class="radzen-dropdown m-0"
+                                                Data="@GetAvailableValueSetsForRow(item)"
+                                                TextProperty="Name"
+                                                ValueProperty="FinancialReferenceValueSetId"
+                                                TValue="int"
+                                                @bind-Value="item.FinancialReferenceValueSetId"
+                                                Placeholder="Select value set" />
                             </EditTemplate>
                         </RadzenDataGridColumn>
                         <RadzenDataGridColumn TItem="FinancialReferenceValue" Property="Value" Title="Value" Width="12rem" MinWidth="10px">

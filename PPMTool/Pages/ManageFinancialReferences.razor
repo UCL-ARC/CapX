@@ -19,7 +19,10 @@ SPDX-License-Identifier: apache-2.0
                 <h1>Manage Financial References</h1>
             </div>
             <div class="col-auto">
-                <RadzenButton class="float-right" Text="Add" Icon="add" Click="@AddReference" Disabled="@(!EditAuthorised)" />
+                <RadzenStack Orientation="Radzen.Orientation.Horizontal">
+                    <RadzenButton class="float-right mr-2" Text="Manage Value Sets" Icon="list" Click="@ManageValueSets" Disabled="@(!EditAuthorised)" />
+                    <RadzenButton class="float-right" Text="Add" Icon="add" Click="@AddReference" Disabled="@(!EditAuthorised)" />
+                </RadzenStack>
             </div>
         </div>
         <div class="row">
