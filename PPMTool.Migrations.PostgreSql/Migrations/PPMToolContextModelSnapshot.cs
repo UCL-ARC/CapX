@@ -250,18 +250,39 @@ namespace PPMTool.Migrations.PostgreSql.Migrations
                     b.Property<int>("FinancialReferenceId")
                         .HasColumnType("integer");
 
+                    b.Property<int>("FinancialReferenceValueSetId")
+                        .HasColumnType("integer");
+
                     b.Property<float>("Value")
                         .HasColumnType("real");
-
-                    b.Property<string>("ValueName")
-                        .IsRequired()
-                        .HasColumnType("text");
 
                     b.HasKey("FinancialReferenceValueId");
 
                     b.HasIndex("FinancialReferenceId");
 
+                    b.HasIndex("FinancialReferenceValueSetId");
+
                     b.ToTable("FinancialReferenceValues");
+                });
+
+            modelBuilder.Entity("PPMTool.Data.Entities.FinancialReferenceValueSet", b =>
+                {
+                    b.Property<int>("FinancialReferenceValueSetId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("FinancialReferenceValueSetId"));
+
+                    b.Property<string>("Description")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("FinancialReferenceValueSetId");
+
+                    b.ToTable("FinancialReferenceValueSets");
                 });
 
             modelBuilder.Entity("PPMTool.Data.Entities.FundingSource", b =>
@@ -1013,8 +1034,8 @@ namespace PPMTool.Migrations.PostgreSql.Migrations
                     b.Property<DateTime>("ChangeDate")
                         .HasColumnType("timestamp without time zone");
 
-                    b.Property<string>("CostValueName")
-                        .HasColumnType("text");
+                    b.Property<int?>("CostValueSetId")
+                        .HasColumnType("integer");
 
                     b.Property<int>("Grade")
                         .HasColumnType("integer");
@@ -1044,6 +1065,8 @@ namespace PPMTool.Migrations.PostgreSql.Migrations
                         .HasColumnType("double precision");
 
                     b.HasKey("WorkloadModelChangeId");
+
+                    b.HasIndex("CostValueSetId");
 
                     b.HasIndex("PersonId");
 
@@ -1125,7 +1148,15 @@ namespace PPMTool.Migrations.PostgreSql.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("PPMTool.Data.Entities.FinancialReferenceValueSet", "FinancialReferenceValueSet")
+                        .WithMany()
+                        .HasForeignKey("FinancialReferenceValueSetId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("FinancialReference");
+
+                    b.Navigation("FinancialReferenceValueSet");
                 });
 
             modelBuilder.Entity("PPMTool.Data.Entities.FundingSource", b =>
@@ -1370,11 +1401,18 @@ namespace PPMTool.Migrations.PostgreSql.Migrations
 
             modelBuilder.Entity("PPMTool.Data.Entities.WorkloadModelChange", b =>
                 {
+                    b.HasOne("PPMTool.Data.Entities.FinancialReferenceValueSet", "CostValueSet")
+                        .WithMany()
+                        .HasForeignKey("CostValueSetId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.HasOne("PPMTool.Data.Entities.Person", "Person")
                         .WithMany("WorkloadModelChanges")
                         .HasForeignKey("PersonId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("CostValueSet");
 
                     b.Navigation("Person");
                 });
