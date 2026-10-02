@@ -1013,9 +1013,6 @@ namespace PPMTool.Migrations.PostgreSql.Migrations
                     b.Property<DateTime>("ChangeDate")
                         .HasColumnType("timestamp without time zone");
 
-                    b.Property<string>("CostValueName")
-                        .HasColumnType("text");
-
                     b.Property<int>("Grade")
                         .HasColumnType("integer");
 

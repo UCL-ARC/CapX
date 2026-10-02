@@ -956,9 +956,6 @@ namespace PPMTool.Migrations.Sqlite.Migrations
                     b.Property<DateTime>("ChangeDate")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("CostValueName")
-                        .HasColumnType("TEXT");
-
                     b.Property<int>("Grade")
                         .HasColumnType("INTEGER");
 

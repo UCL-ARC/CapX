@@ -1013,9 +1013,6 @@ namespace PPMTool.Migrations.SqlServer.Migrations
                     b.Property<DateTime>("ChangeDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("CostValueName")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<int>("Grade")
                         .HasColumnType("int");
 
