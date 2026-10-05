@@ -78,14 +78,26 @@ namespace PPMTool.Pages
         {
             if (result == -1)
             {
-                SetErrorMessage(new StatusMessage("A value set with that name already exists.", StatusMessage.MessageType.Error));
+                MarkRowSaveFailed();
+
+                SetErrorMessage(new StatusMessage(
+                    "A value set with that name already exists.",
+                    StatusMessage.MessageType.Error));
+
                 return false;
             }
+
             if (result == -3)
             {
-                SetErrorMessage(new StatusMessage("Value set name is required.", StatusMessage.MessageType.Error));
+                MarkRowSaveFailed();
+
+                SetErrorMessage(new StatusMessage(
+                    "Value set name is required.",
+                    StatusMessage.MessageType.Error));
+
                 return false;
             }
+
             return true;
         }
 
@@ -95,6 +107,22 @@ namespace PPMTool.Pages
         /// <param name="entity"></param>
         protected override void CancelEdit(FinancialReferenceValueSet entity)
         {
+            // Unsaved row being inserted - just remove it completely
+            if (ReferenceEquals(entityToInsert, entity))
+            {
+                dataGrid.CancelEditRow(entity);
+
+                if (dataGridEntities.Contains(entity))
+                {
+                    dataGridEntities.Remove(entity);
+                }
+
+                Reset();
+                dataGrid.Reload();
+                return;
+            }
+
+            // Existing row being edited
             Reset();
             FinancialReferenceService.RestoreModel(Context, ref entity);
             dataGrid.CancelEditRow(entity);
@@ -107,6 +135,13 @@ namespace PPMTool.Pages
         /// <returns></returns>
         protected override async Task DeleteRow(FinancialReferenceValueSet entity)
         {
+            // Unsaved rows can't be deleted from the DB as they were never saved
+            if (ReferenceEquals(entityToInsert, entity))
+            {
+                await base.DeleteRow(entity);
+                return;
+            }
+
             if (await DialogService.Confirm($"You are about to delete value set {entity.GetSensibleObjectName()}.", "Delete") ?? false)
             {
                 var result = FinancialReferenceService.DeleteValueSet(Context, entity);
