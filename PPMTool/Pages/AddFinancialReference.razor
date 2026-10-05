@@ -70,10 +70,7 @@ SPDX-License-Identifier: apache-2.0
                                                 Placeholder="Select value set" />
                             </EditTemplate>
                         </RadzenDataGridColumn>
-                        <RadzenDataGridColumn TItem="FinancialReferenceValue" Property="Value" Title="Value" Width="12rem" MinWidth="10px">
-                            <Template Context="item">
-                                @item.Value.ToString("C")
-                            </Template>
+                            <RadzenDataGridColumn TItem="FinancialReferenceValue" Property="Value" Title="Value" Width="12rem" MinWidth="10px" FormatString="{0:C0}">
                             <EditTemplate Context="item">
                                 <RadzenNumeric Min="0" Step="0.01" @bind-Value="item.Value" Style="width:100%; display:block;" />
                             </EditTemplate>

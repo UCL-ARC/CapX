@@ -221,8 +221,6 @@ namespace PPMTool.Pages
                 entityToInsert.FinancialReferenceValueSetId = firstAvailable.FinancialReferenceValueSetId;
                 entityToInsert.FinancialReferenceValueSet = firstAvailable;
             }
-
-            await dataGrid.EditRow(entityToInsert);
         }
 
         /// <summary>

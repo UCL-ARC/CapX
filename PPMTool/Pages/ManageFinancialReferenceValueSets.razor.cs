@@ -42,6 +42,8 @@ namespace PPMTool.Pages
         protected override void OnCreateRow(FinancialReferenceValueSet entity)
         {
             entity.Name = entity.Name?.Trim() ?? string.Empty;
+
+            // Re-uses the FinRefService so can't call the base method.
             var result = FinancialReferenceService.AddValueSet(Context, entity);
             if (!CheckSuccessAndSetError(result))
             {
