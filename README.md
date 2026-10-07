@@ -91,8 +91,7 @@ To set this up, create a `.env` file in the repository root with the following r
 | `CONNECTION_STRING` | SQLite connection string, e.g. `Data Source=state/PPMTool.db` |
 | `LEAVEBOOKINGS_CONNECTION_STRING` | Connection string for the leave bookings database (The University of Manchester only) |
 | `API_KEY_SECRET` | Secret for API key generation (minimum 16 characters). Use `openssl rand -hex 16` to generate a strong key. |
-| `CAPX_HTTP_PORT` | Port for the web application (e.g. `3000`) |
-| `CAPX_API_PORT` | Port for the API (e.g. `3001`) |
+| `CAPX_HTTP_PORT` | Port for the web application (e.g. `5001`) |
 | `CAPX_STATE_DIR` | Where the SQLite DB lives outside the container (if using this DB provider) |
 | `SEED_DUMMY_DATA` | Set to `TRUE` to seed dummy data on startup |
 | `SUPERUSER_NAME` | Name of the superuser (required if seeding) |
@@ -134,9 +133,9 @@ docker compose --env-file /path/to/env/file up --build
 ```
 
 You can then access:
-- The web application at `http://localhost:3000` (or your configured `CAPX_HTTP_PORT`)
-- The API at `http://localhost:3000/api` (or your configured `CAPX_HTTP_PORT`)
-- The swagger interface at `http://localhost:3000/swagger` (or your configured `CAPX_HTTP_PORT`)
+- The web application at `http://localhost:5001` (or your configured `CAPX_HTTP_PORT`)
+- The API at `http://localhost:5001/api` (or your configured `CAPX_HTTP_PORT`)
+- The swagger interface at `http://localhost:5001/swagger` (or your configured `CAPX_HTTP_PORT`)
 
 Use Ctrl-C to bring the container down. The database state is maintained in a Docker volume. To wipe the volume and start from the initial state, use:
 
