@@ -1,0 +1,121 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "capx.fullname" . }}
+  labels:
+    app.kubernetes.io/name: {{ include "capx.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+spec:
+  # The app currently runs EF migrations during startup; keep one pod until
+  # migrations are moved to a dedicated one-shot command/job.
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "capx.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "capx.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+    spec:
+      containers:
+        - name: capx
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: ["dotnet", "PPMTool.dll"]
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          env:
+            - name: ASPNETCORE_ENVIRONMENT
+              value: {{ .Values.config.aspnetcoreEnvironment | quote }}
+            - name: DB_PROVIDER
+              value: {{ .Values.config.dbProvider | quote }}
+            - name: LEAVEBOOKINGS_CONNECTION_STRING
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.existingSecret }}
+                  key: leave-bookings-connection-string
+            - name: SEED_DUMMY_DATA
+              value: {{ .Values.config.seedDummyData | quote }}
+            - name: SUPERUSER_NAME
+              value: {{ required "config.superuserName must be set" .Values.config.superuserName | quote }}
+            - name: SUPERUSER_USERNAME
+              value: {{ required "config.superuserUsername must be set" .Values.config.superuserUsername | quote }}
+            - name: SUPERUSER_EMAIL
+              value: {{ required "config.superuserEmail must be set" .Values.config.superuserEmail | quote }}
+            - name: DP_KEY_PATH
+              value: {{ .Values.config.dpKeyPath | quote }}
+            - name: SENTRY_DSN
+              value: {{ .Values.config.sentryDsn | quote }}
+            - name: MAIL_FROM_ADDRESS
+              value: {{ .Values.config.mailFromAddress | quote }}
+            - name: MAIL_SMTP_SERVER
+              value: {{ .Values.config.mailSmtpServer | quote }}
+            - name: AUTH_TYPE
+              value: {{ .Values.config.authType | quote }}
+            - name: AUTH_HOST_URL
+              value: {{ .Values.config.authHostUrl | quote }}
+            - name: ENTRA_INSTANCE
+              value: {{ .Values.config.entraInstance | quote }}
+            - name: ENTRA_DOMAIN
+              value: {{ .Values.config.entraDomain | quote }}
+            - name: ENTRA_TENANT_ID
+              value: {{ .Values.config.entraTenantId | quote }}
+            - name: ENTRA_CLIENT_ID
+              value: {{ .Values.config.entraClientId | quote }}
+            - name: ENTRA_CALLBACK_PATH
+              value: {{ .Values.config.entraCallbackPath | quote }}
+            - name: CAS_PROTOCOL
+              value: {{ .Values.config.casProtocol | quote }}
+            - name: CAS_BASE_URL
+              value: {{ .Values.config.casBaseUrl | quote }}
+            - name: CONNECTION_STRING
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.existingSecret }}
+                  key: connection-string
+            - name: API_KEY_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.existingSecret }}
+                  key: api-key-secret
+            - name: ENTRA_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.existingSecret }}
+                  key: entra-client-secret
+                  optional: true
+          startupProbe:
+            httpGet:
+              path: /
+              port: http
+            periodSeconds: 5
+            failureThreshold: 36
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+            periodSeconds: 20
+          {{- if .Values.dataProtection.enabled }}
+          volumeMounts:
+            - name: data-protection
+              mountPath: {{ .Values.config.dpKeyPath }}
+          {{- end }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      {{- if .Values.dataProtection.enabled }}
+      volumes:
+        - name: data-protection
+          persistentVolumeClaim:
+            claimName: {{ include "capx.fullname" . }}-data-protection
+      {{- end }}

@@ -21,6 +21,23 @@ Any user of the web application can gain access to the API endpoints. Note that 
 ## Deployment
 Deployment scripts, as well as reverse proxy configurations and sample environment variable files, are provided in the `deployment` directory. These scripts can be used with cron to long-poll GitHub for changes to the relevant branch, kicking off a re-build of the container as appropriate. The development deploy script additionally copies the database from the production VM prior to applying migrations to ensure the development version is tested on real data. The production database is also backed-up as part of the deployment process in case of failure. Any time a DB file is to be copied, all the `PPMTool.db*` files are copied since WAL is enabled. `sqlite3 PPMTool.db VACUUM;` is used to flush the WAL journals before any manipulation of the DB takes place.
 
+### Local Kubernetes development
+With Minikube running, start or update CapX and forward it to
+<http://localhost:5001> with:
+
+```sh
+./deployment/minikube-up.sh
+```
+
+Press Ctrl-C to stop port forwarding. This local setup uses SQLite data stored
+in the pod, so it is disposable.
+
+### Kubernetes deployment
+The Helm chart in [`deployment/helm`](deployment/helm) deploys CapX to an
+existing workload cluster; it does not provision the underlying infrastructure
+or a cluster. See [the chart README](deployment/helm/README.md) for deployment
+configuration and installation details.
+
 > [!WARNING]
 > The app will fail to start if it detects that required variables are not set. Exception details will be written to the log files in the `Logs` folder as well as `syslog` or `docker log`.
 
