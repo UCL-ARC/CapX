@@ -1,4 +1,4 @@
-# CapX Helm chart
+# CapX Helm Chart
 
 This Helm chart deploys the CapX web application into an **existing Kubernetes
 workload cluster**. It does not provision the underlying infrastructure or
@@ -18,7 +18,9 @@ chart, and forwards the app to <http://localhost:5001>. This uses SQLite stored
 in the pod, so local data is disposable. The manual instructions below are for
 installing into an existing workload cluster.
 
-## Configure secrets
+## Deploy to an Existing Cluster
+
+### Configure Secrets
 
 Create a Secret in the target namespace. `connection-string` must be the
 `PPMToolContextConnection` connection string for the selected provider.
@@ -38,7 +40,7 @@ Use an external secret manager in production where available. Avoid committing
 secret values to a values file. If using CAS instead of Entra ID, the unused
 Entra secret key can be an empty value.
 
-## Install
+### Install
 
 Edit a local values file for the image, ingress host/TLS, authentication
 settings, superuser details, and optional mail settings. Then install or
