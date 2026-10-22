@@ -43,11 +43,17 @@ spec:
             - name: SEED_DUMMY_DATA
               value: {{ .Values.config.seedDummyData | quote }}
             - name: SUPERUSER_NAME
-              value: {{ required "config.superuserName must be set" .Values.config.superuserName | quote }}
+              value: {{ required
+                "config.superuserName must be set"
+                .Values.config.superuserName | quote }}
             - name: SUPERUSER_USERNAME
-              value: {{ required "config.superuserUsername must be set" .Values.config.superuserUsername | quote }}
+              value: {{ required
+                "config.superuserUsername must be set"
+                .Values.config.superuserUsername | quote }}
             - name: SUPERUSER_EMAIL
-              value: {{ required "config.superuserEmail must be set" .Values.config.superuserEmail | quote }}
+              value: {{ required
+                "config.superuserEmail must be set"
+                .Values.config.superuserEmail | quote }}
             - name: DP_KEY_PATH
               value: {{ .Values.config.dpKeyPath | quote }}
             - name: SENTRY_DSN

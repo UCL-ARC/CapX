@@ -3,5 +3,7 @@
 {{- end }}
 
 {{- define "capx.fullname" -}}
-{{- printf "%s-%s" .Release.Name (include "capx.name" .) | trunc 63 | trimSuffix "-" }}
+{{- printf "%s-%s" .Release.Name (include "capx.name" .)
+    | trunc 63
+    | trimSuffix "-" }}
 {{- end }}
