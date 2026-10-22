@@ -26,7 +26,8 @@ Create a Secret in the target namespace. `connection-string` must be the
 integration is unused; provide a nonblank placeholder in that case.
 
 ```sh
-kubectl create secret generic capx-secrets \
+kubectl create namespace capx --dry-run=client -o yaml | kubectl apply -f -
+kubectl --namespace capx create secret generic capx-secrets \
   --from-literal=connection-string='Host=db.example;Database=capx;Username=capx;Password=REPLACE_ME' \
   --from-literal=leave-bookings-connection-string='Host=unused;Database=unused;Username=unused;Password=unused' \
   --from-literal=api-key-secret='REPLACE_WITH_AT_LEAST_32_RANDOM_CHARACTERS' \
@@ -45,6 +46,7 @@ upgrade:
 
 ```sh
 helm upgrade --install capx deployment/helm \
+  --values /path/to/your-values.yaml \
   --namespace capx --create-namespace \
   --set image.repository=ghcr.io/your-org/capx \
   --set image.tag=YOUR_IMMUTABLE_TAG \

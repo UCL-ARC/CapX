@@ -62,6 +62,11 @@ helm upgrade --install "${RELEASE}" "${REPO_DIR}/deployment/helm" \
   --set-string config.superuserEmail=admin@example.org \
   --wait --timeout 5m
 
+kubectl --context "${PROFILE}" --namespace "${NAMESPACE}" \
+  rollout restart "deployment/${SERVICE}"
+kubectl --context "${PROFILE}" --namespace "${NAMESPACE}" \
+  rollout status "deployment/${SERVICE}" --timeout=5m
+
 echo "==> Forward http://localhost:${LOCAL_PORT} to the CapX service"
 echo "Press Ctrl-C to stop port forwarding. The release remains installed."
 kubectl --context "${PROFILE}" --namespace "${NAMESPACE}" \
