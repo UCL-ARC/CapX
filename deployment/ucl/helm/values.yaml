@@ -1,0 +1,47 @@
+replicaCount: 1
+
+image:
+  repository: ghcr.io/your-org/capx
+  tag: latest
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 80
+
+ingress:
+  enabled: false
+  className: ""
+  host: capx.example.com
+  tls: []
+
+# Create this Kubernetes Secret out of band. Required keys are listed in README.
+existingSecret: capx-secrets
+
+config:
+  aspnetcoreEnvironment: Production
+  dbProvider: postgresql
+  seedDummyData: "FALSE"
+  superuserName: ""
+  superuserUsername: ""
+  superuserEmail: ""
+  dpKeyPath: /app/keys
+  sentryDsn: ""
+  mailFromAddress: ""
+  mailSmtpServer: ""
+  authType: AzureAd
+  authHostUrl: https://capx.example.com
+  entraInstance: https://login.microsoftonline.com/
+  entraDomain: ""
+  entraTenantId: ""
+  entraClientId: ""
+  entraCallbackPath: /signin-oidc
+  casProtocol: ""
+  casBaseUrl: ""
+
+dataProtection:
+  enabled: true
+  storageClassName: ""
+  size: 1Gi
+
+resources: {}
