@@ -36,4 +36,4 @@ rm "${MINIKUBE_DEB}"
 git clone --branch "${CAPX_REF}" --single-branch \
   "${CAPX_REPO_URL}" "${CAPX_DIR}"
 
-echo "Log out and back in, then run: ${CAPX_DIR}/deployment/minikube-up.sh"
+echo "Log out and back in, then run: ${CAPX_DIR}/deployment/ucl/minikube-up.sh"

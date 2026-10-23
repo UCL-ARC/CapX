@@ -5,7 +5,7 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-REPO_DIR="$(cd -- "${SCRIPT_DIR}/.." && pwd)"
+REPO_DIR="$(cd -- "${SCRIPT_DIR}/../.." && pwd)"
 
 PROFILE="${MINIKUBE_PROFILE:-capx-dev}"
 NAMESPACE="${CAPX_NAMESPACE:-capx-local}"
@@ -47,7 +47,7 @@ if ! kubectl --context "${PROFILE}" --namespace "${NAMESPACE}" \
 fi
 
 echo "==> Install or upgrade Helm release ${RELEASE}"
-helm upgrade --install "${RELEASE}" "${REPO_DIR}/deployment/helm" \
+helm upgrade --install "${RELEASE}" "${SCRIPT_DIR}/helm" \
   --kube-context "${PROFILE}" \
   --namespace "${NAMESPACE}" \
   --create-namespace \

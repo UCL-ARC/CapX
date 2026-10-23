@@ -26,17 +26,17 @@ With Minikube running, start or update CapX and forward it to
 <http://localhost:5001> with:
 
 ```sh
-./deployment/minikube-up.sh
+./deployment/ucl/minikube-up.sh
 ```
 
 Press Ctrl-C to stop port forwarding. This local setup uses SQLite data stored
 in the pod, so it is disposable.
 
 ### Kubernetes Deployment
-The Helm chart in [`deployment/helm`](deployment/helm) deploys CapX to an
-existing workload cluster; it does not provision the underlying infrastructure
-or a cluster. See [the chart README](deployment/helm/README.md) for deployment
-configuration and installation details.
+The Helm chart in [`deployment/ucl/helm`](deployment/ucl/helm) deploys CapX to
+an existing workload cluster; it does not provision the underlying
+infrastructure or a cluster. See [the chart README](deployment/ucl/helm/README.md)
+for deployment configuration and installation details.
 
 > [!WARNING]
 > The app will fail to start if it detects that required variables are not set. Exception details will be written to the log files in the `Logs` folder as well as `syslog` or `docker log`.

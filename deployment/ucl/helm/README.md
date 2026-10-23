@@ -50,7 +50,7 @@ settings, superuser details, and optional mail settings. Then install or
 upgrade:
 
 ```sh
-helm upgrade --install capx deployment/helm \
+helm upgrade --install capx deployment/ucl/helm \
   --values /path/to/your-values.yaml \
   --namespace capx --create-namespace \
   --set image.repository=ghcr.io/your-org/capx \
