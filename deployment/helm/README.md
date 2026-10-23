@@ -18,6 +18,9 @@ chart, and forwards the app to <http://localhost:5001>. This uses SQLite stored
 in the pod, so local data is disposable. The manual instructions below are for
 installing into an existing workload cluster.
 
+The port-forward listens on all interfaces by default. Set
+`CAPX_PORT_FORWARD_ADDRESS=127.0.0.1` to restrict it to this machine.
+
 ## Deploy to an Existing Cluster
 
 ### Configure Secrets

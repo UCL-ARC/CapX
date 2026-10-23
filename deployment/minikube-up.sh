@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-# SPDX-FileCopyrightText: 2026 University of Manchester
-#
 # SPDX-License-Identifier: apache-2.0
 
 set -euo pipefail
@@ -13,6 +11,7 @@ PROFILE="${MINIKUBE_PROFILE:-capx-dev}"
 NAMESPACE="${CAPX_NAMESPACE:-capx-local}"
 RELEASE="${CAPX_RELEASE:-capx}"
 LOCAL_PORT="${CAPX_LOCAL_PORT:-5001}"
+PORT_FORWARD_ADDRESS="${CAPX_PORT_FORWARD_ADDRESS:-0.0.0.0}"
 IMAGE="capx:dev"
 SECRET="capx-secrets"
 SERVICE="${RELEASE}-capx"
@@ -67,7 +66,9 @@ kubectl --context "${PROFILE}" --namespace "${NAMESPACE}" \
 kubectl --context "${PROFILE}" --namespace "${NAMESPACE}" \
   rollout status "deployment/${SERVICE}" --timeout=5m
 
-echo "==> Forward http://localhost:${LOCAL_PORT} to the CapX service"
+echo "==> Forward CapX on ${PORT_FORWARD_ADDRESS}:${LOCAL_PORT}"
+echo "Open http://localhost:${LOCAL_PORT} on this machine."
 echo "Press Ctrl-C to stop port forwarding. The release remains installed."
 kubectl --context "${PROFILE}" --namespace "${NAMESPACE}" \
-  port-forward "service/${SERVICE}" "${LOCAL_PORT}:80"
+  port-forward --address "${PORT_FORWARD_ADDRESS}" \
+  "service/${SERVICE}" "${LOCAL_PORT}:80"
