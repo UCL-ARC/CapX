@@ -33,22 +33,22 @@ Leave Node Scheduling and Virtual Machine Scheduling at their defaults.
 Add the ingress labels:
 
 | Key                                | Value    |
-|------------------------------------|----------|
+| ---------------------------------- | -------- |
 | `condenser.ingress/isEnabled`      | `true`   |
 | `condenser.ingress.capx/hostname`  | `capx`   |
 | `condenser.ingress.capx/port`      | `80`     |
 | `condenser.ingress.capx/interface` | `enp1s0` |
 
-The VM's KubeVirt interface is named `default`; the Ubuntu guest interface
-that receives its IP is `enp1s0`. The explicit `interface` Instance Label
-tells ingress which guest interface to use when it sees multiple interfaces.
+The VM's KubeVirt interface is named `default`; the Ubuntu guest interface that
+receives its IP is `enp1s0`. The explicit `interface` Instance Label tells
+ingress which guest interface to use when it sees multiple interfaces.
 
 ### Annotations
 
 Set this annotation under **Annotations**:
 
 | Key                                          | Value         |
-|----------------------------------------------|---------------|
+| -------------------------------------------- | ------------- |
 | `harvesterhci.io/waitForLeaseInterfaceNames` | `["default"]` |
 
 The value must match the network interface **Name** above.
@@ -57,8 +57,8 @@ The value must match the network interface **Name** above.
 
 Set up SSH access by following the Condenser guide for
 [logging into a VM by SSH](https://condenser.arc.ucl.ac.uk/documentation/ssh_login).
-Use the `condenser` SSH host alias from that guide. From the repository root
-on your workstation, set `VM_IP` to the VM's current IP from Rancher, copy the
+Use the `condenser` SSH host alias from that guide. From the repository root on
+your workstation, set `VM_IP` to the VM's current IP from Rancher, copy the
 preparation script, and connect through the bastion:
 
 ```sh
@@ -96,13 +96,13 @@ cd ~/capx
 
 The Minikube script starts the Docker-based profile with port 80 published,
 enables the Traefik Ingress controller, and installs the chart's Ingress
-resource. Condenser terminates HTTPS and sends HTTP to port 80 on the VM.
-The VM's Ingress port label must therefore be `80`; it is not the CapX
-container port `8080` or the former port-forward port `5001`.
+resource. Condenser terminates HTTPS and sends HTTP to port 80 on the VM. The
+VM's Ingress port label must therefore be `80`; it is not the CapX container
+port `8080` or the former port-forward port `5001`.
 
-The expected URL is
-`https://capx.arc-devops.condenser.arc.ucl.ac.uk`. If the Minikube profile
-already exists without the port 80 mapping, delete and recreate it once:
+The expected URL is `https://capx.arc-devops.condenser.arc.ucl.ac.uk`. If the
+Minikube profile already exists without the port 80 mapping, delete and recreate
+it once:
 
 ```sh
 minikube delete -p capx-dev
