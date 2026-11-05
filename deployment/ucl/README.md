@@ -2,17 +2,15 @@
 
 ## Create A VM
 
-Create the VM in the `arc-devops-ns` namespace using these settings. The
-resources match the current trial and are not production sizing
-recommendations.
+Create the VM using these settings. The resources match the current trial and
+are not production sizing recommendations.
 
 ### Basics
 
-- Name: `paddy-capx` (or another unique VM name)
+- Name: a unique name
 - CPU: 2
 - Memory: 8 GiB
-- SSH key: `arc-devops-ns/paddy`
-- Leave CPU and memory hotplug disabled.
+- SSH key: select an SSH key
 
 ### Volumes
 
@@ -28,14 +26,14 @@ Add one network interface:
 
 - Name: `default`
 - Model: `virtio`
-- Network: `arc-devops-ns/default`
+- Network: `<namespace>/default`
 - Type: `bridge`
 
 Leave Node Scheduling and Virtual Machine Scheduling at their defaults.
 
-### Labels
+### Instance Labels
 
-Leave **Labels** empty. Add the ingress labels under **Instance Labels**:
+Add the ingress labels:
 
 | Key                                | Value    |
 |------------------------------------|----------|
@@ -47,8 +45,6 @@ Leave **Labels** empty. Add the ingress labels under **Instance Labels**:
 The VM's KubeVirt interface is named `default`; the Ubuntu guest interface
 that receives its IP is `enp1s0`. The explicit `interface` Instance Label
 tells ingress which guest interface to use when it sees multiple interfaces.
-Do not add a plain `interface` label under **Labels**. Harvester adds
-`harvesterhci.io/vmName` automatically.
 
 ### Annotations
 
@@ -61,30 +57,11 @@ this interface if the form exposes that option:
 
 The value must match the network interface **Name** above.
 
-### Advanced Options And Cloud Configuration
+### Advanced Options
 
 - Keep the default OS and machine settings; use `q35` if a machine type is
   required.
-- Set the guest hostname to `paddy-capx` if prompted.
-- In Cloud Configuration **User Data**, install and start the QEMU guest
-  agent:
-
-  ```yaml
-  #cloud-config
-  package_update: true
-  packages:
-    - qemu-guest-agent
-  runcmd:
-    - - systemctl
-      - enable
-      - --now
-      - qemu-guest-agent.service
-  ```
-
-- Keep the `ssh_authorized_keys` entry for the selected SSH key if it is
-  included in the generated User Data. It must be a complete public key on one
-  YAML list item; do not put a private key here.
-- Leave Network Data at its default or blank when the network provides DHCP.
+- Set the guest hostname to match the VM name if prompted.
 
 ## Prepare The VM
 
