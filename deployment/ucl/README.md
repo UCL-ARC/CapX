@@ -14,7 +14,6 @@ are not production sizing recommendations.
 
 ### Volumes
 
-- Name: `disk-0`
 - Type: `disk`
 - Image: `harvester-public/Ubuntu 26.04`
 - Size: 40 GiB
@@ -24,7 +23,6 @@ are not production sizing recommendations.
 
 Add one network interface:
 
-- Name: `default`
 - Model: `virtio`
 - Network: `<namespace>/default`
 - Type: `bridge`
@@ -56,12 +54,6 @@ this interface if the form exposes that option:
 | `harvesterhci.io/waitForLeaseInterfaceNames` | `["default"]` |
 
 The value must match the network interface **Name** above.
-
-### Advanced Options
-
-- Keep the default OS and machine settings; use `q35` if a machine type is
-  required.
-- Set the guest hostname to match the VM name if prompted.
 
 ## Prepare The VM
 
