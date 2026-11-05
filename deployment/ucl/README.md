@@ -3,7 +3,8 @@
 ## Create A VM
 
 Create the VM using these settings. The resources match the current trial and
-are not production sizing recommendations.
+are not production sizing recommendations. Default values have not been
+included.
 
 ### Basics
 
@@ -15,16 +16,13 @@ are not production sizing recommendations.
 
 ### Volumes
 
-- Type: `disk`
 - Image: `harvester-public/Ubuntu 26.04`
 - Size: 40 GiB
-- Bus: VirtIO
 
 ### Networks
 
 Add one network interface:
 
-- Model: `virtio`
 - Network: `<namespace>/default`
 - Type: `bridge`
 
