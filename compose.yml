@@ -14,7 +14,7 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT:?}
       - API_KEY_SECRET=${API_KEY_SECRET:?}
-      - CONNECTION_STRING=${CONNECTION_STRING:?}
+      - CONNECTION_STRING=${CONNECTION_STRING:?}      
       - LEAVEBOOKINGS_CONNECTION_STRING=${LEAVEBOOKINGS_CONNECTION_STRING:?}
       - SEED_DUMMY_DATA=${SEED_DUMMY_DATA:-FALSE}
       - SUPERUSER_NAME=${SUPERUSER_NAME:?}
@@ -39,7 +39,7 @@ services:
       - ${CAPX_HTTP_PORT:?}:8080
     command: ["dotnet", "PPMTool.dll"]
     restart: always
-
+    
     healthcheck:
       test:
         [
