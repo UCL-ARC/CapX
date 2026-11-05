@@ -53,21 +53,32 @@ Set this annotation under **Annotations**:
 
 The value must match the network interface **Name** above.
 
+## Access The VM Over SSH
+
+Set up SSH access by following the Condenser guide for
+[logging into a VM by SSH](https://condenser.arc.ucl.ac.uk/documentation/ssh_login).
+Use the `condenser` SSH host alias from that guide. From the repository root
+on your workstation, set `VM_IP` to the VM's current IP from Rancher, copy the
+preparation script, and connect through the bastion:
+
+```sh
+VM_IP=replace-with-vm-ip
+scp -o ProxyJump=condenser deployment/ucl/ubuntu-prepare.sh \
+  "ubuntu@${VM_IP}:~/ubuntu-prepare.sh"
+ssh -J condenser "ubuntu@${VM_IP}"
+```
+
 ## Prepare The VM
 
-After the VM starts, connect using its IP and confirm Ubuntu has an address on
-`enp1s0`:
+In the SSH session, confirm Ubuntu has an address on `enp1s0`:
 
 ```sh
 ip -br -4 addr
 ```
 
-From the repository root on your workstation, copy the preparation script to
-the VM, then run it over SSH:
+Then run the preparation script:
 
 ```sh
-scp deployment/ucl/ubuntu-prepare.sh ubuntu@<VM-IP>:~/ubuntu-prepare.sh
-ssh ubuntu@<VM-IP>
 ~/ubuntu-prepare.sh
 ```
 
