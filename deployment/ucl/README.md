@@ -55,11 +55,10 @@ The value must match the network interface **Name** above.
 
 ## Access The VM Over SSH
 
-Set up SSH access by following the Condenser guide for
-[logging into a VM by SSH](https://condenser.arc.ucl.ac.uk/documentation/ssh_login).
-Use the `condenser` SSH host alias from that guide. From the repository root on
-your workstation, set `VM_IP` to the VM's current IP from Rancher, copy the
-preparation script, and connect through the bastion:
+Set up SSH access using the [Condenser SSH guide](https://condenser.arc.ucl.ac.uk/documentation/ssh_login).
+Use the `condenser` SSH host alias from that guide. From the repository root
+on your workstation, set `VM_IP` to the VM's current IP from Rancher, copy
+the preparation script, and connect through the bastion:
 
 ```sh
 VM_IP=replace-with-vm-ip
@@ -100,9 +99,12 @@ resource. Condenser terminates HTTPS and sends HTTP to port 80 on the VM. The
 VM's Ingress port label must therefore be `80`; it is not the CapX container
 port `8080` or the former port-forward port `5001`.
 
-The expected URL is `https://capx.arc-devops.condenser.arc.ucl.ac.uk`. If the
-Minikube profile already exists without the port 80 mapping, delete and recreate
-it once:
+The expected URL is `https://capx.arc-devops.condenser.arc.ucl.ac.uk`. The
+service is password protected; the setup script saves the generated credentials
+on the VM in `~/.config/capx/ingress-credentials`.
+
+If the Minikube profile already exists without the port 80 mapping, delete and
+recreate it once:
 
 ```sh
 minikube delete -p capx-dev

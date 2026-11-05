@@ -5,7 +5,10 @@ metadata:
   name: {{ include "capx.fullname" . }}
   {{ if .Values.ingress.basicAuth.enabled }}
   annotations:
-    traefik.ingress.kubernetes.io/router.middlewares: {{ printf "%s-%s@kubernetescrd" .Release.Namespace (printf "%s-auth" (include "capx.fullname" .)) | quote }}
+    traefik.ingress.kubernetes.io/router.middlewares: {{ printf
+      "%s-%s@kubernetescrd"
+      .Release.Namespace
+      (printf "%s-auth" (include "capx.fullname" .)) | quote }}
   {{ end }}
 spec:
   {{- with .Values.ingress.className }}
