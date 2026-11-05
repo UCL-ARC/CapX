@@ -8,6 +8,7 @@ are not production sizing recommendations.
 ### Basics
 
 - Name: a unique name
+- Description: add a description
 - CPU: 2
 - Memory: 8 GiB
 - SSH key: select an SSH key
@@ -46,8 +47,7 @@ tells ingress which guest interface to use when it sees multiple interfaces.
 
 ### Annotations
 
-Set this annotation under **Annotations**, or enable **Wait for Lease** for
-this interface if the form exposes that option:
+Set this annotation under **Annotations**:
 
 | Key                                          | Value         |
 |----------------------------------------------|---------------|
@@ -70,7 +70,6 @@ the VM, then run it over SSH:
 ```sh
 scp deployment/ucl/ubuntu-prepare.sh ubuntu@<VM-IP>:~/ubuntu-prepare.sh
 ssh ubuntu@<VM-IP>
-chmod +x ~/ubuntu-prepare.sh
 ~/ubuntu-prepare.sh
 ```
 
