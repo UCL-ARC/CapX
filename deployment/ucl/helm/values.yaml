@@ -1,26 +1,24 @@
-replicaCount: 1
-
 image:
-  repository: ghcr.io/your-org/capx
-  tag: latest
-  pullPolicy: IfNotPresent
+  repository: capx
+  tag: dev
+  pullPolicy: Never
 
 service:
   type: ClusterIP
   port: 80
 
 ingress:
-  enabled: false
-  className: ""
-  host: capx.example.com
+  enabled: true
+  className: traefik
+  host: capx.arc-devops.condenser.arc.ucl.ac.uk
   tls: []
 
-# Create this Kubernetes Secret out of band. Required keys are listed in README.
+# The setup script creates this development Secret.
 existingSecret: capx-secrets
 
 config:
-  aspnetcoreEnvironment: Production
-  dbProvider: postgresql
+  aspnetcoreEnvironment: Development
+  dbProvider: sqlite
   seedDummyData: "FALSE"
   superuserName: ""
   superuserUsername: ""
@@ -30,7 +28,7 @@ config:
   mailFromAddress: ""
   mailSmtpServer: ""
   authType: AzureAd
-  authHostUrl: https://capx.example.com
+  authHostUrl: https://capx.arc-devops.condenser.arc.ucl.ac.uk
   entraInstance: https://login.microsoftonline.com/
   entraDomain: ""
   entraTenantId: ""
