@@ -12,6 +12,9 @@ ingress:
   className: traefik
   host: capx.arc-devops.condenser.arc.ucl.ac.uk
   tls: []
+  basicAuth:
+    enabled: true
+    secretName: capx-ingress-auth
 
 # The setup script creates this development Secret.
 existingSecret: capx-secrets

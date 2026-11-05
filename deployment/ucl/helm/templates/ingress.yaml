@@ -3,6 +3,10 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: {{ include "capx.fullname" . }}
+  {{ if .Values.ingress.basicAuth.enabled }}
+  annotations:
+    traefik.ingress.kubernetes.io/router.middlewares: {{ printf "%s-%s@kubernetescrd" .Release.Namespace (printf "%s-auth" (include "capx.fullname" .)) | quote }}
+  {{ end }}
 spec:
   {{- with .Values.ingress.className }}
   ingressClassName: {{ . | quote }}

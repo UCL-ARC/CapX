@@ -14,7 +14,9 @@ INGRESS_HOST="${CAPX_INGRESS_HOST:-capx.arc-devops.condenser.arc.ucl.ac.uk}"
 APP_URL="${CAPX_APP_URL:-https://${INGRESS_HOST}}"
 IMAGE="capx:dev"
 SECRET="capx-secrets"
+INGRESS_SECRET="capx-ingress-auth"
 SERVICE="${RELEASE}-capx"
+INGRESS_CREDENTIALS_FILE="${HOME}/.config/capx/ingress-credentials"
 
 for command in docker helm kubectl minikube openssl; do
   if ! command -v "${command}" >/dev/null 2>&1; then
@@ -57,6 +59,31 @@ if ! kubectl --context "${PROFILE}" --namespace "${NAMESPACE}" \
     --from-literal=api-key-secret="$(openssl rand -hex 32)"
 fi
 
+echo "==> Ensure password protection for the Ingress"
+umask 077
+mkdir -p "$(dirname -- "${INGRESS_CREDENTIALS_FILE}")"
+chmod 700 "$(dirname -- "${INGRESS_CREDENTIALS_FILE}")"
+if [[ ! -s "${INGRESS_CREDENTIALS_FILE}" ]]; then
+  INGRESS_PASSWORD="$(openssl rand -hex 24)"
+  printf 'username: capx-trial\npassword: %s\n' \
+    "${INGRESS_PASSWORD}" >"${INGRESS_CREDENTIALS_FILE}"
+else
+  INGRESS_PASSWORD="$(sed -n 's/^password: //p' \
+    "${INGRESS_CREDENTIALS_FILE}")"
+  if [[ -z "${INGRESS_PASSWORD}" ]]; then
+    echo "No password found in ${INGRESS_CREDENTIALS_FILE}." >&2
+    exit 1
+  fi
+fi
+chmod 600 "${INGRESS_CREDENTIALS_FILE}"
+INGRESS_PASSWORD_HASH="$(openssl passwd -apr1 \
+  -salt "$(openssl rand -hex 4)" "${INGRESS_PASSWORD}")"
+kubectl --context "${PROFILE}" --namespace "${NAMESPACE}" \
+  create secret generic "${INGRESS_SECRET}" \
+  --from-literal="users=capx-trial:${INGRESS_PASSWORD_HASH}" \
+  --dry-run=client -o yaml | kubectl --context "${PROFILE}" \
+  --namespace "${NAMESPACE}" apply -f -
+
 echo "==> Install or upgrade Helm release ${RELEASE}"
 helm upgrade --install "${RELEASE}" "${SCRIPT_DIR}/helm" \
   --kube-context "${PROFILE}" \
@@ -69,6 +96,8 @@ helm upgrade --install "${RELEASE}" "${SCRIPT_DIR}/helm" \
   --set config.dbProvider=sqlite \
   --set ingress.enabled=true \
   --set ingress.className=traefik \
+  --set ingress.basicAuth.enabled=true \
+  --set-string ingress.basicAuth.secretName="${INGRESS_SECRET}" \
   --set-string ingress.host="${INGRESS_HOST}" \
   --set-string config.authHostUrl="${APP_URL}" \
   --set-string config.superuserName='Local Admin' \
@@ -82,4 +111,5 @@ kubectl --context "${PROFILE}" --namespace "${NAMESPACE}" \
   rollout status "deployment/${SERVICE}" --timeout=5m
 
 echo "CapX is available at ${APP_URL}"
+echo "Ingress credentials are in ${INGRESS_CREDENTIALS_FILE}"
 echo "The Minikube Ingress controller accepts HTTP on port 80."

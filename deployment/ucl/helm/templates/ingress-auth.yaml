@@ -1,0 +1,10 @@
+{{- if and .Values.ingress.enabled .Values.ingress.basicAuth.enabled }}
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: {{ include "capx.fullname" . }}-auth
+spec:
+  basicAuth:
+    secret: {{ required "ingress.basicAuth.secretName must be set" .Values.ingress.basicAuth.secretName | quote }}
+    removeHeader: true
+{{- end }}
