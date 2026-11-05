@@ -12,14 +12,18 @@ job and verify the app's shared state requirements.
 
 ## Local Minikube
 
-For local development, run [`../minikube-up.sh`](../minikube-up.sh) from the
-repository root. It builds and loads the `Local` image, installs or upgrades the
-chart, and forwards the app to <http://localhost:5001>. This uses SQLite stored
-in the pod, so local data is disposable. The manual instructions below are for
-installing into an existing workload cluster.
+For the local Minikube setup, run
+[`../minikube-up.sh`](../minikube-up.sh) from the repository root. It builds
+and loads the `Local` image, enables the Traefik Ingress controller, installs
+or upgrades the chart with an Ingress rule, and exposes HTTP on port 80. Set
+`CAPX_INGRESS_HOST` to the hostname the Ingress rule should match. This uses
+SQLite stored in the pod, so local data is disposable. The manual instructions
+below are for installing into an existing workload cluster.
 
-The port-forward listens on all interfaces by default. Set
-`CAPX_PORT_FORWARD_ADDRESS=127.0.0.1` to restrict it to this machine.
+The Traefik Minikube add-on requires Minikube 1.39.0 or newer. For local
+testing, point the chosen hostname at `127.0.0.1` and use an `http://` value
+for `CAPX_APP_URL`. This local Ingress setup serves HTTP; terminate TLS at the
+network edge in other environments.
 
 ## Deploy to an Existing Cluster
 

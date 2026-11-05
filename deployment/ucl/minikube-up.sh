@@ -10,8 +10,8 @@ REPO_DIR="$(cd -- "${SCRIPT_DIR}/../.." && pwd)"
 PROFILE="${MINIKUBE_PROFILE:-capx-dev}"
 NAMESPACE="${CAPX_NAMESPACE:-capx-local}"
 RELEASE="${CAPX_RELEASE:-capx}"
-LOCAL_PORT="${CAPX_LOCAL_PORT:-5001}"
-PORT_FORWARD_ADDRESS="${CAPX_PORT_FORWARD_ADDRESS:-0.0.0.0}"
+INGRESS_HOST="${CAPX_INGRESS_HOST:-capx.arc-devops.condenser.arc.ucl.ac.uk}"
+APP_URL="${CAPX_APP_URL:-https://${INGRESS_HOST}}"
 IMAGE="capx:dev"
 SECRET="capx-secrets"
 SERVICE="${RELEASE}-capx"
@@ -24,7 +24,18 @@ for command in docker helm kubectl minikube openssl; do
 done
 
 echo "==> Start Minikube profile ${PROFILE}"
-minikube start -p "${PROFILE}" --driver=docker
+minikube start -p "${PROFILE}" --driver=docker --ports=80:80
+
+if ! docker port "${PROFILE}" 80/tcp >/dev/null 2>&1; then
+  echo "Minikube profile ${PROFILE} does not publish port 80." >&2
+  echo "Recreate it with: minikube delete -p ${PROFILE}" >&2
+  echo "Then rerun this script." >&2
+  exit 1
+fi
+
+echo "==> Enable Traefik Ingress controller"
+minikube addons disable ingress -p "${PROFILE}"
+minikube addons enable traefik -p "${PROFILE}"
 
 echo "==> Build CapX local image"
 docker build --build-arg BUILD_CONFIG=Local -t "${IMAGE}" "${REPO_DIR}"
@@ -56,6 +67,10 @@ helm upgrade --install "${RELEASE}" "${SCRIPT_DIR}/helm" \
   --set image.pullPolicy=Never \
   --set config.aspnetcoreEnvironment=Development \
   --set config.dbProvider=sqlite \
+  --set ingress.enabled=true \
+  --set ingress.className=traefik \
+  --set-string ingress.host="${INGRESS_HOST}" \
+  --set-string config.authHostUrl="${APP_URL}" \
   --set-string config.superuserName='Local Admin' \
   --set-string config.superuserUsername=admin \
   --set-string config.superuserEmail=admin@example.org \
@@ -66,9 +81,5 @@ kubectl --context "${PROFILE}" --namespace "${NAMESPACE}" \
 kubectl --context "${PROFILE}" --namespace "${NAMESPACE}" \
   rollout status "deployment/${SERVICE}" --timeout=5m
 
-echo "==> Forward CapX on ${PORT_FORWARD_ADDRESS}:${LOCAL_PORT}"
-echo "Open http://localhost:${LOCAL_PORT} on this machine."
-echo "Press Ctrl-C to stop port forwarding. The release remains installed."
-kubectl --context "${PROFILE}" --namespace "${NAMESPACE}" \
-  port-forward --address "${PORT_FORWARD_ADDRESS}" \
-  "service/${SERVICE}" "${LOCAL_PORT}:80"
+echo "CapX is available at ${APP_URL}"
+echo "The Minikube Ingress controller accepts HTTP on port 80."

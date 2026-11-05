@@ -19,22 +19,28 @@ create or configure the VM. Terraform can manage that Harvester VM separately;
 switching the CapX deployment from Helm to Terraform would not replace the
 Helm chart.
 
-For the current VM, test the network lease setting used by the workshop before
-recreating the VM with Terraform. The guest network interface is named
-`default`, so the VM template annotations should include:
+The Minikube profile must publish port 80 from its Docker node to port 80 on
+the VM. The setup script does this with `--ports=80:80`, enables Traefik, and
+installs the chart's Ingress resource. If the profile was created before this
+port mapping was added, delete and recreate it once with
+`minikube delete -p capx-dev` before running the script.
+
+Configure the VM's Instance Labels so Condenser ingress targets the VM's
+`enp1s0` guest interface and HTTP port 80:
 
 ```yaml
-harvesterhci.io/waitForLeaseInterfaceNames: '["default"]'
+condenser.ingress/isEnabled: "true"
+condenser.ingress.capx/hostname: capx
+condenser.ingress.capx/port: "80"
+condenser.ingress.capx/interface: enp1s0
 ```
 
-The Condenser ingress labels belong on the VM template labels. Keep the
-hostname and port labels used by this deployment, and confirm that the VM
-reports an IP address in Harvester after it restarts. The guest's `ip addr`
-output and a successful `curl` from inside the VM confirm guest networking,
-but do not confirm that the ingress controller has discovered the VM.
+The hostname resolves as
+`https://capx.arc-devops.condenser.arc.ucl.ac.uk`. Condenser terminates TLS and
+forwards HTTP to port 80 on the VM. The port label refers to the Minikube
+Ingress controller's listening port, not CapX's container port 8080 or the
+service's previous port-forward port 5001.
 
-After the VM reports its IP, keep the port-forward process running and test
-the ingress hostname from a client on the required network. If TLS still
-returns an `unrecognized name` alert, the request is reaching the shared TLS
-endpoint but its SNI hostname is not configured there; that needs ingress
-configuration checked independently of the Helm release.
+The `interface` label is needed because the VM has multiple network
+interfaces. The guest interface `enp1s0` holds the VM address; the Harvester
+interface name `default` is not the guest OS interface name used for routing.
