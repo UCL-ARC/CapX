@@ -46,4 +46,10 @@ dataProtection:
   storageClassName: ""
   size: 1Gi
 
+database:
+  persistence:
+    enabled: true
+    storageClassName: ""
+    size: 5Gi
+
 resources: {}

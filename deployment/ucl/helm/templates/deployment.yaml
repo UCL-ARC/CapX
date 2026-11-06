@@ -112,16 +112,25 @@ spec:
               path: /
               port: http
             periodSeconds: 20
-          {{- if .Values.dataProtection.enabled }}
           volumeMounts:
+            {{- if .Values.dataProtection.enabled }}
             - name: data-protection
               mountPath: {{ .Values.config.dpKeyPath }}
-          {{- end }}
+            {{- end }}
+            {{- if .Values.database.persistence.enabled }}
+            - name: database
+              mountPath: /app/state
+            {{- end }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
-      {{- if .Values.dataProtection.enabled }}
       volumes:
+        {{- if .Values.dataProtection.enabled }}
         - name: data-protection
           persistentVolumeClaim:
             claimName: {{ include "capx.fullname" . }}-data-protection
-      {{- end }}
+        {{- end }}
+        {{- if .Values.database.persistence.enabled }}
+        - name: database
+          persistentVolumeClaim:
+            claimName: {{ include "capx.fullname" . }}-database
+        {{- end }}
