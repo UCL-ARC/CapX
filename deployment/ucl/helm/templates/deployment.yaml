@@ -93,9 +93,9 @@ spec:
             - name: ENTRA_CLIENT_SECRET
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.existingSecret }}
+                  name: {{ .Values.config.entraClientSecretSecretName }}
                   key: entra-client-secret
-                  optional: true
+                  optional: {{ ne .Values.config.authType "AzureAd" }}
           startupProbe:
             httpGet:
               path: /

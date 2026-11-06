@@ -17,6 +17,10 @@ and forwards HTTP to the VM on port 80.
   password to trusted operators: anyone who knows it can impersonate any seeded
   account, including the superuser. This is a temporary access gate, not a
   substitute for configuring the app's normal sign-in before wider use.
+- To use Entra sign-in, follow the
+  [Entra setup guide](../README.md#enable-entra-single-sign-on). The chart
+  reads the client secret from a Kubernetes Secret and does not store it in
+  chart values.
 - CapX uses SQLite inside the application pod. Replacing the pod or deleting the
   Minikube profile can discard the database; this is disposable trial data, not
   durable storage.

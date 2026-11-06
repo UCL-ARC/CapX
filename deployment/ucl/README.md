@@ -141,3 +141,55 @@ minikube delete -p capx-dev
 
 Then run `deployment/ucl/minikube-up.sh`. The profile's SQLite data is
 disposable.
+
+## Enable Entra Single Sign-On
+
+The default setup builds the `Local` configuration for development sign-in.
+To use Entra, first ask the identity team to register CapX as a single-tenant
+web application. Add this exact Web redirect URI to the app registration:
+
+```text
+https://capx.arc-devops.condenser.arc.ucl.ac.uk/signin-oidc
+```
+
+Ask for the tenant's verified domain, tenant ID, client ID, and a client
+secret. The client secret is used by the app to complete the OIDC sign-in flow.
+Keep it out of this public repository. On the VM, save it in a private file:
+
+```bash
+umask 077
+mkdir -p ~/.config/capx
+read -rsp 'Entra client secret: ' ENTRA_CLIENT_SECRET
+printf '%s' "${ENTRA_CLIENT_SECRET}" \
+  >~/.config/capx/entra-client-secret
+chmod 600 ~/.config/capx/entra-client-secret
+unset ENTRA_CLIENT_SECRET
+```
+
+The client secret is stored in a Kubernetes Secret in the Minikube cluster.
+Kubernetes does not encrypt Secrets at rest by default, so restrict access to
+the VM and its Kubernetes configuration. Confirm approved at-rest protection
+before using this setup for long-term production.
+
+Run the setup script in `Release` mode, replacing the example values with the
+values from the app registration. Choose the initial CapX superuser account;
+users must also exist in CapX and their username or email must match the Entra
+`preferred_username` claim (or email claim if that claim is absent).
+
+```bash
+CAPX_BUILD_CONFIG=Release \
+CAPX_ENTRA_DOMAIN='<verified-tenant-domain>' \
+CAPX_ENTRA_TENANT_ID='<tenant-id>' \
+CAPX_ENTRA_CLIENT_ID='<client-id>' \
+CAPX_ENTRA_CLIENT_SECRET_FILE="$HOME/.config/capx/entra-client-secret" \
+CAPX_SUPERUSER_NAME='<superuser-name>' \
+CAPX_SUPERUSER_USERNAME='<superuser-username>' \
+CAPX_SUPERUSER_EMAIL='<superuser-email>' \
+./deployment/ucl/minikube-up.sh
+```
+
+Release mode builds the app with Entra authentication enabled, stores the
+client secret in a Kubernetes Secret, and disables the development Basic Auth
+gate. The default callback path is `/signin-oidc`; if the public host changes,
+register the matching `https://<host>/signin-oidc` URI and set
+`CAPX_INGRESS_HOST` to that host before running the script.

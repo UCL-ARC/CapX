@@ -37,6 +37,7 @@ config:
   entraDomain: ""
   entraTenantId: ""
   entraClientId: ""
+  entraClientSecretSecretName: capx-entra-secret
   entraCallbackPath: /signin-oidc
   casProtocol: ""
   casBaseUrl: ""
