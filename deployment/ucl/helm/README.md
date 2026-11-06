@@ -17,9 +17,10 @@ and forwards HTTP to the VM on port 80.
   password to trusted operators: anyone who knows it can impersonate any seeded
   account, including the superuser. This is a temporary access gate, not a
   substitute for configuring the app's normal sign-in before wider use.
-- CapX uses SQLite inside the application pod. Replacing the pod or deleting the
-  Minikube profile can discard the database; this is disposable trial data, not
-  durable storage.
+- CapX uses SQLite on a persistent volume mounted at `/app/state`. The database
+  survives pod replacement and Helm upgrades. The volume is kept if the release
+  is uninstalled. Deleting the Minikube profile, losing the VM, or losing its
+  storage can still lose the database; this is not a database backup.
 - The chart runs one replica because CapX applies database migrations during
   startup.
 - Data-protection keys are stored in a persistent volume claim. Helm keeps that
