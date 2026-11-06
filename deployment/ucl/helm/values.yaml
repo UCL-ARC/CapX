@@ -1,0 +1,49 @@
+---
+image:
+  repository: capx
+  tag: dev
+  pullPolicy: Never
+
+service:
+  type: ClusterIP
+  port: 80
+
+ingress:
+  enabled: true
+  className: traefik
+  host: capx.arc-devops.condenser.arc.ucl.ac.uk
+  tls: []
+  basicAuth:
+    enabled: true
+    secretName: capx-ingress-auth
+
+# The setup script creates this development Secret.
+existingSecret: capx-secrets
+
+config:
+  aspnetcoreEnvironment: Development
+  dbProvider: sqlite
+  seedDummyData: "FALSE"
+  superuserName: ""
+  superuserUsername: ""
+  superuserEmail: ""
+  dpKeyPath: /app/keys
+  sentryDsn: ""
+  mailFromAddress: ""
+  mailSmtpServer: ""
+  authType: AzureAd
+  authHostUrl: https://capx.arc-devops.condenser.arc.ucl.ac.uk
+  entraInstance: https://login.microsoftonline.com/
+  entraDomain: ""
+  entraTenantId: ""
+  entraClientId: ""
+  entraCallbackPath: /signin-oidc
+  casProtocol: ""
+  casBaseUrl: ""
+
+dataProtection:
+  enabled: true
+  storageClassName: ""
+  size: 1Gi
+
+resources: {}
