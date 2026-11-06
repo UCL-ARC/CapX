@@ -150,10 +150,7 @@ namespace PPMTool.Helpers
                 ValidateValue("ENTRA_DOMAIN", "Authentication:AzureAd:Domain", ref builder);
                 ValidateValue("ENTRA_TENANT_ID", "Authentication:AzureAd:TenantId", ref builder);
                 ValidateValue("ENTRA_CLIENT_ID", "Authentication:AzureAd:ClientId", ref builder);
-                ValidateValue(
-                    "ENTRA_CLIENT_SECRET",
-                    "Authentication:AzureAd:ClientSecret",
-                    ref builder);
+                ValidateValue("ENTRA_CLIENT_SECRET", "Authentication:AzureAd:ClientSecret", ref builder);
                 ValidateValue("ENTRA_CALLBACK_PATH", "Authentication:AzureAd:CallbackPath", ref builder);
             }
             ValidateValue("AUTH_HOST_URL", "Authentication:HostUrl", ref builder);
