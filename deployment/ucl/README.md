@@ -55,7 +55,8 @@ The value must match the network interface **Name** above.
 
 ## Access The VM Over SSH
 
-Set up SSH access using the [Condenser SSH guide](https://condenser.arc.ucl.ac.uk/documentation/ssh_login).
+Set up SSH access using the
+[Condenser SSH guide](https://condenser.arc.ucl.ac.uk/documentation/ssh_login).
 Use the `condenser` SSH host alias from that guide. From the repository root
 on your workstation, set `VM_IP` to the VM's current IP from Rancher, copy
 the preparation script, and connect through the bastion:
@@ -102,6 +103,21 @@ port `8080` or the former port-forward port `5001`.
 The expected URL is `https://capx.arc-devops.condenser.arc.ucl.ac.uk`. The
 service is password protected; the setup script saves the generated credentials
 on the VM in `~/.config/capx/ingress-credentials`.
+
+### Smoke Test
+
+From a workstation with access to Condenser, run the smoke test and enter the
+Ingress password when prompted:
+
+```sh
+./deployment/ucl/smoke-test.sh
+```
+
+Then open the URL in a browser, enter the same Ingress credentials, and log in
+as **Local Admin**. Confirm the app loads and a live Blazor page responds.
+The script checks HTTPS, password enforcement, the local sign-in cookie, and
+Blazor SignalR negotiation. In browser developer tools, check that the
+`/_blazor` WebSocket request connects, then verify the UI remains interactive.
 
 If the Minikube profile already exists without the port 80 mapping, delete and
 recreate it once:

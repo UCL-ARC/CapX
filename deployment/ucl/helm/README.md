@@ -13,8 +13,9 @@ and forwards HTTP to the VM on port 80.
   visitor select any seeded account, the chart protects the Ingress with HTTP
   Basic Authentication. The script generates a random password and saves it in
   `~/.config/capx/ingress-credentials`. Enter those credentials at the browser
-  prompt before the CapX page loads. Keep the file private and share the
-  credentials only with trial users. This is a temporary access gate, not a
+  prompt before the CapX page loads. Keep the file private and limit the shared
+  password to trusted operators: anyone who knows it can impersonate any seeded
+  account, including the superuser. This is a temporary access gate, not a
   substitute for configuring the app's normal sign-in before wider use.
 - CapX uses SQLite inside the application pod. Replacing the pod or deleting the
   Minikube profile can discard the database; this is disposable trial data, not
