@@ -20,10 +20,20 @@ for command in curl grep; do
   fi
 done
 
-read -r -s -p "Ingress password for ${AUTH_USER}: " AUTH_PASSWORD
-printf '\n'
+if [[ -n "${CAPX_INGRESS_PASSWORD_FILE:-}" ]]; then
+  if [[ ! -r "${CAPX_INGRESS_PASSWORD_FILE}" ]]; then
+    echo "Cannot read ${CAPX_INGRESS_PASSWORD_FILE}." >&2
+    exit 1
+  fi
+  AUTH_PASSWORD="$(sed -n 's/^password: //p' \
+    "${CAPX_INGRESS_PASSWORD_FILE}")"
+else
+  read -r -s -p "Ingress password for ${AUTH_USER}: " AUTH_PASSWORD
+  printf '\n'
+fi
+
 if [[ -z "${AUTH_PASSWORD}" ]]; then
-  echo "Ingress password cannot be empty." >&2
+  echo "No ingress password was provided." >&2
   exit 1
 fi
 
@@ -44,7 +54,7 @@ unset AUTH_PASSWORD
 
 echo "==> Check unauthenticated requests are rejected"
 STATUS="$(curl --silent --show-error --max-time 20 \
-  --dump-header "${UNAUTH_HEADERS}" --output /dev/null \
+  --noproxy '*' --dump-header "${UNAUTH_HEADERS}" --output /dev/null \
   --write-out '%{http_code}' "${BASE_URL}/")"
 if [[ "${STATUS}" != 401 ]] \
   || ! grep -qi '^www-authenticate: Basic' "${UNAUTH_HEADERS}"; then
@@ -54,7 +64,7 @@ fi
 
 echo "==> Check authenticated HTTPS access"
 STATUS="$(curl --silent --show-error --max-time 20 \
-  --config "${AUTH_CONFIG}" --output "${ROOT_PAGE}" \
+  --noproxy '*' --config "${AUTH_CONFIG}" --output "${ROOT_PAGE}" \
   --write-out '%{http_code}' "${BASE_URL}/")"
 if [[ "${STATUS}" != 200 ]]; then
   echo "Expected HTTP 200 with credentials; got ${STATUS}." >&2
@@ -67,7 +77,8 @@ fi
 
 echo "==> Check Local admin sign-in sets an authentication cookie"
 STATUS="$(curl --silent --show-error --location --max-time 30 \
-  --config "${AUTH_CONFIG}" --cookie "${COOKIE_JAR}" \
+  --noproxy '*' --config "${AUTH_CONFIG}" \
+  --cookie "${COOKIE_JAR}" \
   --cookie-jar "${COOKIE_JAR}" --output "${LOGIN_PAGE}" \
   --write-out '%{http_code}' \
   "${BASE_URL}/Account/Login?username=admin&returnUrl=%2F")"
@@ -78,7 +89,8 @@ fi
 
 echo "==> Check Blazor SignalR negotiation through the proxy"
 STATUS="$(curl --silent --show-error --max-time 20 \
-  --config "${AUTH_CONFIG}" --cookie "${COOKIE_JAR}" \
+  --noproxy '*' --config "${AUTH_CONFIG}" \
+  --cookie "${COOKIE_JAR}" \
   --cookie-jar "${COOKIE_JAR}" --data '' \
   --output "${NEGOTIATE_RESPONSE}" --write-out '%{http_code}' \
   "${BASE_URL}/_blazor/negotiate?negotiateVersion=1")"

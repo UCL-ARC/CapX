@@ -113,6 +113,19 @@ Ingress password when prompted:
 ./deployment/ucl/smoke-test.sh
 ```
 
+To avoid retyping, copy the credentials file from the VM over SSH, then pass
+its path to the script:
+
+```sh
+scp -o ProxyJump=condenser \
+  "ubuntu@${VM_IP}:~/.config/capx/ingress-credentials" \
+  /tmp/capx-ingress-credentials
+chmod 600 /tmp/capx-ingress-credentials
+CAPX_INGRESS_PASSWORD_FILE=/tmp/capx-ingress-credentials \
+  ./deployment/ucl/smoke-test.sh
+rm /tmp/capx-ingress-credentials
+```
+
 Then open the URL in a browser, enter the same Ingress credentials, and log in
 as **Local Admin**. Confirm the app loads and a live Blazor page responds.
 The script checks HTTPS, password enforcement, the local sign-in cookie, and
